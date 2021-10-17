@@ -1,3 +1,3 @@
 # wisdom-of-crowds
 
-Getting git set up.
+Getting git set up. 
