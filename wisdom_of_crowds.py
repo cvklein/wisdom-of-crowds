@@ -1,3 +1,8 @@
+import networkx as nx
+from collections import defaultdict
+import itertools
+from networkx.exception import NetworkXNoPath
+
 class Crowd:
     def __init__(self,G,max_m=5,node_key='T'):
         self.G = G
