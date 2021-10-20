@@ -4,15 +4,15 @@ import itertools
 from networkx.exception import NetworkXNoPath
 
 class Crowd:
-""" 
-Class for encapsulating a graph and pre-computed (memoized) features for the 
-Wisdom of Crowds algorithm, per Sullivan et al. (2020),
-"Vulnerability in Social Epistemic Networks" *International Journal of Philosophical Studies* 
-https://doi.org/10.1080/09672559.2020.1782562
-:param G: a networkx graph, typically DiGraph.
-:param max_m: maximum m to consider in the calculations
-:param node_key: attribute to consider for each node, when considering topic diversity (defaults to 'T')
-"""
+    """ 
+    Class for encapsulating a graph and pre-computed (memoized) features for the 
+    Wisdom of Crowds algorithm, per Sullivan et al. (2020),
+    "Vulnerability in Social Epistemic Networks" *International Journal of Philosophical Studies* 
+    https://doi.org/10.1080/09672559.2020.1782562
+    :param G: a networkx graph, typically DiGraph.
+    :param max_m: maximum m to consider in the calculations
+    :param node_key: attribute to consider for each node, when considering topic diversity (defaults to 'T')
+    """
     def __init__(self, G, max_m=5, node_key='T'):
         self.G = G
         self.min_k = 2
