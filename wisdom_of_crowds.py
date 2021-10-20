@@ -232,10 +232,10 @@ https://doi.org/10.1080/09672559.2020.1782562
         """
         h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is true
         :param v: vertex to evaluate
-        :param max_h: maximum_h to evaluate, defaults to 6 per the literature 
+        :param max_h: maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
         :returns: integer h, in range 1 <= h <= max_h 
         """
-        for h in range(max_h,0,-1):
-            if self.is_mk_observer(v,h,h):
+        for h in range(max_h, 0, -1):
+            if self.is_mk_observer(v, h, h):
                 return h
         return 0
