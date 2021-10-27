@@ -55,7 +55,7 @@ class Crowd:
         # step 1: am I in the generic path dictionary? (memoized)
         try:
             shortest_unconditional_path = self.precomputed_path_dict[(source,target)]
-        except KeyError: #well figure this later in case it comes in handy
+        except KeyError: #we'll figure this later in case it comes in handy
             try:
                 shortest_unconditional_path = nx.algorithms.shortest_path(self.G,source,target)
                 self.precomputed_path_dict[(source,target)] = shortest_unconditional_path
@@ -161,7 +161,7 @@ class Crowd:
                     if lena != lenb:
                         pass
                     # avoid double counting
-                    # thogh you can probably do this faster by not adding the trivial clique until later?
+                    # though you can probably do this faster by not adding the trivial clique until later?
                     elif (a == trivial_clique) or (b == trivial_clique):
                         pass
                     else:
@@ -219,6 +219,46 @@ class Crowd:
         return len(topics)
 
 
+    def edge_topics(self, v):
+        """
+        Recursively determines what topics are transmitted by vertex v, these
+            being those transmitted by its informants as well as v's own topic(s)
+        :param v: vertex to evaluate
+        :returns: set
+        """
+        print("Calling edge_topics() for node ", v)
+        topics = set()
+        for t in self.G.nodes[v]['T']: #include the topics v transmits itself.
+            topics.add(t)
+        #print("Node", v, "'s topic: ", topics)
+        source_edges = self.G.in_edges(v)
+        for edge in source_edges:  # include the topics transmitted by v's informants
+            for t in self.edge_topics(edge[0]): topics.add(t)
+            #print("Edge: ",edge, DG.nodes[edge[0]]['T'])
+            #topics.add(DG.nodes[edge[0]]['T'])
+            #print("Topics: ", topics)
+        for edge in self.G.out_edges(v): self.G.edges[edge]['T'] = topics
+        #for edge in DG.out_edges(v): print("Node", edge[0], "'s outgoing topics currently are ", DG.edges[edge]['T'])
+        print("Final topics for node", v, " ", topics)
+        return topics
+
+
+    def D_edge(self, v):
+        """
+        Calculating D edge-wise by seeing which topics are transmitted by the 
+            informants of vertex v per (Sullivan et al. 2020)
+        :param v: vertex to evaluate
+        :returns: integer D_edge, in range 0 <= D_edge
+        """
+        print("Calling D_edge() for node ", v) 
+        in_topics = set()
+        for edge in self.G.predecessors(v):
+            t = self.edge_topics(edge)
+            for i in t: in_topics.add(i)
+        print("Inbound topics for node", v, "are ", in_topics)
+        return len(in_topics)
+ 
+         
     def pi(self, v):
         """
         pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the product of S and D
