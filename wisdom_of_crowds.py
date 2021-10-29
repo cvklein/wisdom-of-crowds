@@ -2,6 +2,7 @@ import networkx as nx
 from collections import defaultdict
 import itertools
 from networkx.exception import NetworkXNoPath
+import warnings
 
 class Crowd:
     """ 
@@ -14,16 +15,22 @@ class Crowd:
     :param node_key: attribute to consider for each node, when considering topic diversity (defaults to 'T')
     """
     def __init__(self, G, max_m=5, node_key='T'):
+        # object check to avoid null ptr reference
+        if G is None:
+            raise ValueError('Crowd: init requires a valid networkx graph!')
         self.G = G
         self.min_k = 2
         self.max_k = 5
         self.min_m = 1
         self.max_m = max_m
-        self.node_key = 'T'
+        self.node_key = node_key
         self.precomputed_path_dict = {} # holds unconditional paths
         self.precomputed_paths_by_hole_node = defaultdict(dict)  # holds dict of paths per node
-        self.node_set = set(G.nodes())
 
+        # if G is okay, we 'hash' the graph data to prevent external updates breaking internal caches
+        # NB: weisfeiler_lehman_graph_hash(G) is the best, but is very performance-draining
+        self.node_set = set(G.nodes())
+        self.edge_set = set(G.edges())  
 
     def __efficient_pairs(self, x):
         """
@@ -52,8 +59,17 @@ class Crowd:
         :param target: target node
         :returns: integer z, in range 0 <= z < +infinity (unadjusted)
         """
+        # error checking: 'v' needs to exist. 
+        # (missing 'source' and 'target' raised by nx)
+        if v not in nx.nodes(self.G):
+            raise nx.NodeNotFound
+
         # step 1: am I in the generic path dictionary? (memoized)
         try:
+            # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
+            if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
+                warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification.')
+                raise KeyError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated!')
             shortest_unconditional_path = self.precomputed_path_dict[(source,target)]
         except KeyError: #well figure this later in case it comes in handy
             try:
@@ -72,10 +88,13 @@ class Crowd:
         # now we have to find the shortest path in a subgraph without the node of interest    
         else: 
             try:
+                # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
+                if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
+                    warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification.')
+                    raise KeyError('Crowd: graph G has been modified externally, cached precomputed_paths_by_hole_node are obsolete and need to be regenerated!')
                 shortest_conditional_path = self.precomputed_paths_by_hole_node[v][(source,target)]
                 return shortest_conditional_path
             except KeyError:
-
                 nodes_less_v = self.node_set - set([v])
                 G_sub = self.G.subgraph(nodes_less_v)
                 try:
@@ -114,6 +133,8 @@ class Crowd:
         :param k: k as defined in (Sullivan et al., 2020)
         :returns: boolean 
         """
+        if m < 1 or k < 1:
+            raise ValueError('Crowd: m,k parameters need to be integers >= 1.')
         source_nodes = list(self.G.predecessors(v))
 
         # if you have fewer than k, then you can't hear from at least k

@@ -35,6 +35,7 @@ def test_init():
     assert c.precomputed_paths_by_hole_node == {}  # holds dict of paths per node
     assert c.node_set == set(G.nodes())
 
+
 def test__efficient_pairs():
     G = nx.Graph()
     c = woc.Crowd(G) # default with generic empty graph, minimum test case
@@ -76,6 +77,7 @@ def test__shortest_path_node_source_target():
     with pytest.raises(nx.NodeNotFound):
         c._Crowd__shortest_path_node_source_target('a','b','missing')
 
+
 def test_shortest_path_length_node_source_target():
     # see test__shortest_path_node_source_target for actual list contents...
     c = __construct_test_crowd_4nodes_linkedlist()
@@ -108,11 +110,13 @@ def test_shortest_path_length_node_source_target():
     with pytest.raises(nx.NodeNotFound):
         c.shortest_path_length_node_source_target('a','b','missing')
 
+
 def __construct_test_crowd_ab_only():
     DG = nx.DiGraph()
     DG.add_edge('a','b')
     c = woc.Crowd(DG)
     return c
+
 
 def __construct_test_crowd_4nodes_linkedlist():
     # a->b->c->d
@@ -122,6 +126,7 @@ def __construct_test_crowd_4nodes_linkedlist():
     DG.add_edge('c','d')
     c = woc.Crowd(DG) 
     return c
+
 
 def __construct_test_crowd_5nodes_shortcut(attrib='T'):
     # a->b->c->d<->e
@@ -133,7 +138,6 @@ def __construct_test_crowd_5nodes_shortcut(attrib='T'):
     DG.add_edge('d','e')
     DG.add_edge('e','d')
     DG.add_edge('a','e')
-
 
     if attrib == 'T':
         c = woc.Crowd(DG)
@@ -149,6 +153,32 @@ def __construct_test_crowd_5nodes_withattrib(attrib):
 
     c = __construct_test_crowd_5nodes_shortcut(attrib=attrib)
     nx.set_node_attributes(c.G, {'a': 'yes', 'b': 'no', 'c': 'yes', 'd': 'no', 'e': 'yes'}, name=attrib)
+    return c
+
+
+def __construct_florentine_bidirectional():
+    # For a basic statistical analysis of the Florentine network, refer
+    # Jackson, M. O. (2010). Social and economic networks. Princeton University Press.
+    # Wasserman S. & Faust, K. (1994). Social Network Analysis: Methods and Applications. Cambridge University Press.
+
+    # The networkx generator methodology is discussed in 
+    # https://networkx.org/documentation/stable/reference/generated/networkx.generators.social.florentine_families_graph.html
+    UG = nx.generators.social.florentine_families_graph()
+    DG = UG.to_directed()
+
+    # note that networkx's generator does not return the isolated node 'Pucci',
+    # which is present in e.g. Jackson (2010) and Wasserman & Faust (1994)... 
+    # ... to add it manually
+    DG.add_node('Pucci')
+
+    # attribute 'T' assigned based on initial letter, either 'a-m' or 'n-z'
+    for n in nx.nodes(DG):
+        if n[0].lower() >= 'a' and n[0].lower() <= 'm':
+            DG.nodes[n]['T'] = 'a-m'
+        else:
+            DG.nodes[n]['T'] = 'n-z'
+
+    c = woc.Crowd(DG)
     return c
 
 
@@ -172,16 +202,46 @@ def test_is_mk_observer():
             else:
                 assert c.is_mk_observer('d',i,j) == False
 
+    # cases: Florentine graph, considering node=Medici
+    c = __construct_florentine_bidirectional()
+    for m in [1,2,3,4,5]: # at least 1 observer  m=[1..5] apart
+        assert c.is_mk_observer('Medici', m, 1) == True # trivial case of Accaiuoli
+
+    for m in [1,2,3,4,5]: # at least 2 observers m=[1..5] apart
+        assert c.is_mk_observer('Medici', m, 2) == True # Accaiuoli-Salviati infinitely apart
+
+    for m in [1,2,3,4,5]: # at least 3 observers...
+        assert c.is_mk_observer('Medici', m, 3) == True # Accaiuoli-Salviati infinitely apart from Barbadori
+
+    for m in [1,2,3,4,5]: # at least 4 observers...
+        assert c.is_mk_observer('Medici', m, 4) == True # Accaiuoli-Salviati inf, Barbadori-Tornabuoni (OR Barbadori-Albizzi): 4 nodes, >4-independent (via Castellani...)
+
+    for m in [1,2,3,4,5]: # at least k=5 observers...
+        if m <= 3:
+            assert c.is_mk_observer('Medici', m, 5) == True # Accaiuoli-Salviati inf, Barbadori-Ridolfi, Barbadori-Albizzi: 5 nodes, <=3-independent (cannot consider Tornabuoni shortcut)
+        else:
+            assert c.is_mk_observer('Medici', m, 5) == False # ...as above, can't find any 5 nodes w/4-deg-of-separation minimum
+
+    for m in [1,2,3,4,5]: # at least k=6 observers...
+        if m == 1:
+            assert c.is_mk_observer('Medici', m, 6) == True # Accaiuoli-Salviati inf, Barbadori/Ridolfi/Tornabuoni/Albizzi at most 1-independent (Ridolfi neighbours Tornabuoni)
+        else:
+            assert c.is_mk_observer('Medici', m, 6) == False # ...as above, can't find any combinations of nodes w/ 6-deg-of-separation minimum
+
 
 def test_S():
     c = __construct_test_crowd_ab_only()
-    # cases: missing v's
+    # case: missing v's
     with pytest.raises(nx.exception.NetworkXError):
         c.S('missing')
 
-    # cases: simple 5-nodes as above
+    # case: simple 5-nodes as above
     c = __construct_test_crowd_5nodes_shortcut()  
-    assert c.S('d') == 10 # i = 5 (runs out), k = 2 max (per is_mk_observer)
+    assert c.S('d') == 5*2 # largest combo c.is_mk_observer('d',5,2)
+
+    # case: Florentine graph, considering node=Medici
+    c = __construct_florentine_bidirectional()
+    assert c.S('Medici') == 5*4 # largest combo c.is_mk_observer('Medici', 5, 4)
 
 
 def test_D():
@@ -204,27 +264,43 @@ def test_D():
     assert c.D('a') == 0
     assert c.D('b') == 1
 
+    # cases: Florentine graph, considering node=Medici, default node_key = 'T'
+    c = __construct_florentine_bidirectional()
+    assert c.D('Medici') == 2  # connected with e.g. Ridolfi ('n-z'), Albizzi ('a-m'), hence topics = len(['a-m','n-z']) = 2
+    assert c.D('Pucci')  == 0  # not connected with anything
+    assert c.D('Lamberteschi') == 1 # only connected with Guadagni ('a-m')
+    assert c.D('Pazzi') == 1 # only connected with Salviati ('n-z')
+
 
 def test_pi():
     c = __construct_test_crowd_ab_only()
-    # cases: missing v's
+    # case: missing v's
     with pytest.raises(nx.exception.NetworkXError):
         c.pi('missing')
 
     # case: using default node_key = 'T'
     c = __construct_test_crowd_5nodes_withattrib('T')
-    assert c.pi('e') == c.S('e')*c.D('e')
+    assert c.pi('e') == c.S('e')*c.D('e') == 6*2
 
+    # case: Florentine graph, considering node=Medici, default node_key = 'T'
+    c = __construct_florentine_bidirectional()
+    assert c.pi('Medici') == c.S('Medici')*c.D('Medici') == 20*2
+
+    
 def test_h_measure():
     c = __construct_test_crowd_ab_only()
-    # cases: missing v's
+    # case: missing v's
     with pytest.raises(nx.exception.NetworkXError):
         c.S('missing')
 
-    # cases: simple 5-nodes as above
+    # case: simple 5-nodes as above
     c = __construct_test_crowd_5nodes_shortcut()  
     assert c.h_measure('d') == 2 # i = 2 === k = 2 max (per is_mk_observer)
 
-    # cases: simple 5-nodes as above, constrained h=k=1
+    # cases simple 5-nodes as above, constrained h=k=1
     c = __construct_test_crowd_5nodes_shortcut()  
     assert c.h_measure('d', max_h=1) == 1 # i = 1 === k = 1 max (per is_mk_observer)
+
+    # case: Florentine graph, considering node=Medici
+    c = __construct_florentine_bidirectional()
+    assert c.h_measure('Medici') == 4
