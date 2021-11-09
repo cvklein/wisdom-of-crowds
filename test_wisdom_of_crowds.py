@@ -189,13 +189,15 @@ def test_is_mk_observer():
         c.is_mk_observer('a',-1,-1) 
     with pytest.raises(ValueError):
         c.is_mk_observer('a',0,0) 
+    with pytest.raises(ValueError):
+        c.is_mk_observer('a',1,1)
     with pytest.raises(nx.exception.NetworkXError):
-        c.is_mk_observer('missing',1,1)
+        c.is_mk_observer('missing',2,2)
 
     # cases: simple 5-nodes as above
     c = __construct_test_crowd_5nodes_shortcut()  
     for i in range(1,6,1):
-        for j in range(1,6,1):
+        for j in range(2,6,1): # (k > 1)
             #warnings.warn(str(i) + str(j) + str(c.is_mk_observer('d',i,j)))
             if j==1 or j==2: # c->d, e->d
                 assert c.is_mk_observer('d',i,j) == True
@@ -204,29 +206,37 @@ def test_is_mk_observer():
 
     # cases: Florentine graph, considering node=Medici
     c = __construct_florentine_bidirectional()
-    for m in [1,2,3,4,5]: # at least 1 observer  m=[1..5] apart
-        assert c.is_mk_observer('Medici', m, 1) == True # trivial case of Accaiuoli
+    # NB: loops intentionally unrolled to clearly demonstrate ground truth
+    # m/k   1    2    3    4    5
+    # ------------------------------
+    # 1     Err  Y    Y    Y    Y
+    # 2     Err  Y    Y    Y    Y
+    # 3     Err  Y    Y    Y    Y
+    # 4     Err  Y    Y    Y    N
+    # 5     Err  Y    Y    Y    N
+    # ------------------------------
+    k = 1
+    for m in [1,2,3,4,5]: # k=1 is undefined
+        with pytest.raises(ValueError):
+            c.is_mk_observer('Medici', m, k)
 
+    k = 2
     for m in [1,2,3,4,5]: # at least 2 observers m=[1..5] apart
-        assert c.is_mk_observer('Medici', m, 2) == True # Accaiuoli-Salviati infinitely apart
+        assert c.is_mk_observer('Medici', m, k) == True # Accaiuoli-Salviati infinitely apart
 
+    k = 3
     for m in [1,2,3,4,5]: # at least 3 observers...
-        assert c.is_mk_observer('Medici', m, 3) == True # Accaiuoli-Salviati infinitely apart from Barbadori
+        assert c.is_mk_observer('Medici', m, k) == True # Accaiuoli-Salviati infinitely apart from Barbadori
 
+    k = 4
     for m in [1,2,3,4,5]: # at least 4 observers...
-        assert c.is_mk_observer('Medici', m, 4) == True # Accaiuoli-Salviati inf, Barbadori-Tornabuoni (OR Barbadori-Albizzi): 4 nodes, >4-independent (via Castellani...)
+        assert c.is_mk_observer('Medici', m, k) == True # Accaiuoli-Salviati inf, Barbadori-Tornabuoni (OR Barbadori-Albizzi): 4 nodes, >4-independent (via Castellani...)
 
-    for m in [1,2,3,4,5]: # at least k=5 observers...
-        if m <= 3:
-            assert c.is_mk_observer('Medici', m, 5) == True # Accaiuoli-Salviati inf, Barbadori-Ridolfi, Barbadori-Albizzi: 5 nodes, <=3-independent (cannot consider Tornabuoni shortcut)
-        else:
-            assert c.is_mk_observer('Medici', m, 5) == False # ...as above, can't find any 5 nodes w/4-deg-of-separation minimum
-
-    for m in [1,2,3,4,5]: # at least k=6 observers...
-        if m == 1:
-            assert c.is_mk_observer('Medici', m, 6) == True # Accaiuoli-Salviati inf, Barbadori/Ridolfi/Tornabuoni/Albizzi at most 1-independent (Ridolfi neighbours Tornabuoni)
-        else:
-            assert c.is_mk_observer('Medici', m, 6) == False # ...as above, can't find any combinations of nodes w/ 6-deg-of-separation minimum
+    k = 5
+    for m in [1,2,3]: # at least k=5 observers...
+        assert c.is_mk_observer('Medici', m, k) == True # Accaiuoli-Salviati inf, Barbadori-Ridolfi, Barbadori-Albizzi: 5 nodes, <=3-independent (cannot consider Tornabuoni shortcut)
+    for m in [4,5]:
+        assert c.is_mk_observer('Medici', m, k) == False # ...as above, can't find any 5 nodes w/4-deg-of-separation minimum
 
 
 def test_S():
@@ -297,9 +307,9 @@ def test_h_measure():
     c = __construct_test_crowd_5nodes_shortcut()  
     assert c.h_measure('d') == 2 # i = 2 === k = 2 max (per is_mk_observer)
 
-    # cases simple 5-nodes as above, constrained h=k=1
+    # cases simple 5-nodes as above, constrained h=k=2
     c = __construct_test_crowd_5nodes_shortcut()  
-    assert c.h_measure('d', max_h=1) == 1 # i = 1 === k = 1 max (per is_mk_observer)
+    assert c.h_measure('d', max_h=2) == 2 # i = 1 === k = 1 max (per is_mk_observer)
 
     # case: Florentine graph, considering node=Medici
     c = __construct_florentine_bidirectional()

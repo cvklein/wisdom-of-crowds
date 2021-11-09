@@ -133,8 +133,8 @@ class Crowd:
         :param k: k as defined in (Sullivan et al., 2020)
         :returns: boolean 
         """
-        if m < 1 or k < 1:
-            raise ValueError('Crowd: m,k parameters need to be integers >= 1.')
+        if m < 1 or k <= 1:
+            raise ValueError('Crowd: m needs to be integer >= 1; k needs to be integer > 1.')
         source_nodes = list(self.G.predecessors(v))
 
         # if you have fewer than k, then you can't hear from at least k
@@ -254,9 +254,9 @@ class Crowd:
         h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is true
         :param v: vertex to evaluate
         :param max_h: maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
-        :returns: integer h, in range 1 <= h <= max_h 
+        :returns: integer h, in range 1 < h <= max_h
         """
-        for h in range(max_h, 0, -1):
+        for h in range(max_h, 1, -1): # recall (k > 1) 
             if self.is_mk_observer(v, h, h):
                 return h
         return 0
