@@ -207,9 +207,12 @@ def test_is_mk_observer():
     # cases: simple 5-nodes as above
     c = __construct_test_crowd_5nodes_shortcut()  
     for i in range(1,6,1):
-        for j in range(2,6,1): # (k > 1)
+        for j in range(1,6,1): # (k > 1)
             #warnings.warn(str(i) + str(j) + str(c.is_mk_observer('d',i,j)))
-            if j==1 or j==2: # c->d, e->d
+            if j==1:
+                with pytest.raises(ValueError):
+                    c.is_mk_observer('d',i,j)
+            elif j==2: # c->d, e->d
                 assert c.is_mk_observer('d',i,j) == True
             else:
                 assert c.is_mk_observer('d',i,j) == False
