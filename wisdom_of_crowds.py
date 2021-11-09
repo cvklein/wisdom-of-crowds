@@ -132,8 +132,8 @@ class Crowd:
         
         # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
         if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
-            warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification.')
-            raise KeyError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated! Suggest using crowd.clear_path_dict()')
+            warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification, and to handle LookupErrors.')
+            raise LookupError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated! Suggest using crowd.clear_path_dict()')
         
         source_nodes = list(self.G.predecessors(v))
 

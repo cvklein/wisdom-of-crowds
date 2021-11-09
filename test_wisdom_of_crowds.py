@@ -63,10 +63,11 @@ def test__shortest_path_node_source_target():
     assert c._Crowd__shortest_path_node_source_target('b','a','d') == ['a','e','d']
 
     # case: test warning and cache fallback warning system - i.e. modify an existing Graph post-creation
-    c = __construct_test_crowd_ab_only()
-    with pytest.warns(Warning, match='Performance warning'):
-        c.G.add_edge('x','y')
-        c._Crowd__shortest_path_node_source_target('b','x','y')
+    # DEPRECATED SINCE COMMIT 20211103: Shifted the precondition check to mk_observer code...
+    # c = __construct_test_crowd_ab_only()
+    # with pytest.warns(Warning, match='Performance warning'):
+    #     c.G.add_edge('x','y')
+    #     c._Crowd__shortest_path_node_source_target('b','x','y')
     
     # case: no such node(s), expect nx.NodeNotFound to be raised by either Crowd or Graph
     c = __construct_test_crowd_ab_only()
@@ -96,10 +97,11 @@ def test_shortest_path_length_node_source_target():
     assert c.shortest_path_length_node_source_target('b','a','d') == 2
 
     # case: test warning and cache fallback warning system - i.e. modify an existing Graph post-creation
-    c = __construct_test_crowd_ab_only()
-    with pytest.warns(Warning, match='Performance warning'):
-        c.G.add_edge('x','y')
-        c.shortest_path_length_node_source_target('b','x','y')
+    # DEPRECATED SINCE COMMIT 20211103: Shifted the precondition check to mk_observer code...
+    # c = __construct_test_crowd_ab_only()
+    # with pytest.warns(Warning, match='Performance warning'):
+    #     c.G.add_edge('x','y')
+    #     c.shortest_path_length_node_source_target('b','x','y')
 
     # case: no such node(s), expect nx.NodeNotFound to be raised by either Crowd or Graph
     c = __construct_test_crowd_ab_only()
@@ -182,6 +184,7 @@ def __construct_florentine_bidirectional():
     return c
 
 
+@pytest.mark.filterwarnings("ignore:Performance warning")
 def test_is_mk_observer():
     c = __construct_test_crowd_ab_only()
     # cases: invalid m,k-s, missing v's
@@ -193,6 +196,13 @@ def test_is_mk_observer():
         c.is_mk_observer('a',1,1)
     with pytest.raises(nx.exception.NetworkXError):
         c.is_mk_observer('missing',2,2)
+
+    # cases: since commit on 20211103
+    # detect a custom LookupError upon outside modification of graph.
+    # decorator @pytest.mark detects and filters the Warning (which is only of use to the human coder)
+    with pytest.raises(LookupError):
+        c.G.add_edge('x','y')
+        c.is_mk_observer('b',2,2)
 
     # cases: simple 5-nodes as above
     c = __construct_test_crowd_5nodes_shortcut()  
