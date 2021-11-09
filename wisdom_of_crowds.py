@@ -66,10 +66,6 @@ class Crowd:
 
         # step 1: am I in the generic path dictionary? (memoized)
         try:
-            # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
-            if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
-                warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification.')
-                raise KeyError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated!')
             shortest_unconditional_path = self.precomputed_path_dict[(source,target)]
         except KeyError: #well figure this later in case it comes in handy
             try:
@@ -88,10 +84,7 @@ class Crowd:
         # now we have to find the shortest path in a subgraph without the node of interest    
         else: 
             try:
-                # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
-                if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
-                    warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification.')
-                    raise KeyError('Crowd: graph G has been modified externally, cached precomputed_paths_by_hole_node are obsolete and need to be regenerated!')
+              
                 shortest_conditional_path = self.precomputed_paths_by_hole_node[v][(source,target)]
                 return shortest_conditional_path
             except KeyError:
@@ -121,7 +114,8 @@ class Crowd:
         if z == 0:
             return(float('inf'))
         else:
-            return z - 1
+            #z-1 because the path is a list of nodes incl start and end ; we're using distance=number of edges, which is 1 less. 
+            return z - 1 
 
 
     def is_mk_observer(self, v, m, k):
@@ -129,12 +123,18 @@ class Crowd:
         is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020)
             optimized clique-finding algo by CVK
         :param v: vertex to evaluate
-        :param m: m as defined in (Sullivan et al., 2020)
-        :param k: k as defined in (Sullivan et al., 2020)
+        :param m: m as defined in (Sullivan et al., 2020); m >= 1
+        :param k: k as defined in (Sullivan et al., 2020); k > 1
         :returns: boolean 
         """
         if m < 1 or k <= 1:
             raise ValueError('Crowd: m needs to be integer >= 1; k needs to be integer > 1.')
+        
+        # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
+        if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
+            warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification.')
+            raise KeyError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated! Suggest using crowd.clear_path_dict()')
+        
         source_nodes = list(self.G.predecessors(v))
 
         # if you have fewer than k, then you can't hear from at least k
@@ -260,3 +260,11 @@ class Crowd:
             if self.is_mk_observer(v, h, h):
                 return h
         return 0
+    
+    def clear_path_dict(self):
+        """
+        clear_path_dict: helper function to completely reset the precomputed path dictionary. Should be used if G is changed. 
+        """
+        self.precomputed_path_dict = {} 
+        self.precomputed_paths_by_hole_node = defaultdict(dict)  
+        return 
