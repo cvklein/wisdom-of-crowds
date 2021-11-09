@@ -327,3 +327,38 @@ def test_h_measure():
     # case: Florentine graph, considering node=Medici
     c = __construct_florentine_bidirectional()
     assert c.h_measure('Medici') == 4
+
+
+@pytest.mark.filterwarnings("ignore:Performance warning")
+def test_clear_path_dict():
+    c = __construct_test_crowd_ab_only()
+
+    c.G.add_edge('x','y')
+    # precondition: since commit on 20211103
+    # firstly, detect a custom LookupError upon outside modification of graph.
+    # decorator @pytest.mark detects and filters the Warning (which is only of use to the human coder)
+    assert c.refresh_requested == False
+    with pytest.raises(LookupError):
+        c.is_mk_observer('b',2,2)
+
+    # case: ensure clear_path_dict does its job...
+    c.clear_path_dict()
+    assert c.precomputed_path_dict == {}
+    assert len(c.precomputed_paths_by_hole_node) == 0
+    assert c.refresh_requested == True
+    c.is_mk_observer('b',2,2) # this should NOT trigger an error
+    assert c.refresh_requested == False
+
+    # ... if we repeat everything above, starting from tampering with the graph,
+    # this should now re-trigger an error, get fixed by the user's clear_path_dict, and be back to normal
+    c.G.add_edge('xx','yy')
+    assert c.refresh_requested == False
+    with pytest.raises(LookupError):
+        c.is_mk_observer('b',2,2)
+    c.clear_path_dict()
+    assert c.precomputed_path_dict == {}
+    assert len(c.precomputed_paths_by_hole_node) == 0
+    assert c.refresh_requested == True
+    c.is_mk_observer('b',2,2) # this should NOT trigger an error
+    assert c.refresh_requested == False
+

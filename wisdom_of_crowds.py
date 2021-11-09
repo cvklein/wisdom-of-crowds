@@ -26,6 +26,7 @@ class Crowd:
         self.node_key = node_key
         self.precomputed_path_dict = {} # holds unconditional paths
         self.precomputed_paths_by_hole_node = defaultdict(dict)  # holds dict of paths per node
+        self.refresh_requested = False
 
         # if G is okay, we 'hash' the graph data to prevent external updates breaking internal caches
         # NB: weisfeiler_lehman_graph_hash(G) is the best, but is very performance-draining
@@ -84,7 +85,6 @@ class Crowd:
         # now we have to find the shortest path in a subgraph without the node of interest    
         else: 
             try:
-              
                 shortest_conditional_path = self.precomputed_paths_by_hole_node[v][(source,target)]
                 return shortest_conditional_path
             except KeyError:
@@ -130,11 +130,25 @@ class Crowd:
         if m < 1 or k <= 1:
             raise ValueError('Crowd: m needs to be integer >= 1; k needs to be integer > 1.')
         
-        # PRECONDITION: if original graph seems to be 'obsolete', force regeneration of all intermediate data
+        # PRECONDITION 1: if original graph seems to be 'obsolete', 
         if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
-            warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification, and to handle LookupErrors.')
-            raise LookupError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated! Suggest using crowd.clear_path_dict()')
-        
+            # and PRECONDITION 2: AND ONLY IF the user fails to call clear_path_dict...
+            if not self.refresh_requested:
+                # throw error and hint as to how user can fix this by regenerating all intermediate data
+                warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification, and to handle LookupErrors.')
+                raise LookupError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated! Suggest using crowd.clear_path_dict()')
+            else:
+                # rehash the nodeset and edgeset so the graph is no longer detected as "changed"
+                # i.e. on next run, the graph is considered "stable" and there is no need to request a refresh
+                self.node_set = set(self.G.nodes())
+                self.edge_set = set(self.G.edges())  
+
+                # user has confirmed that the cache has indeed been cleared.
+                assert self.precomputed_path_dict == {}
+                assert len(self.precomputed_paths_by_hole_node) == 0
+                # disable the error detector for future runs (until the graph is tampered-with, again)
+                self.refresh_requested = False
+
         source_nodes = list(self.G.predecessors(v))
 
         # if you have fewer than k, then you can't hear from at least k
@@ -263,8 +277,10 @@ class Crowd:
     
     def clear_path_dict(self):
         """
-        clear_path_dict: helper function to completely reset the precomputed path dictionary. Should be used if G is changed. 
+        clear_path_dict: helper function to completely reset the precomputed path dictionary. 
+        Should be used if G is changed. 
         """
         self.precomputed_path_dict = {} 
         self.precomputed_paths_by_hole_node = defaultdict(dict)  
+        self.refresh_requested = True
         return 
