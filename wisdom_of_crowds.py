@@ -381,3 +381,64 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
         return None
     else:
         return None
+
+
+#iterative graph pruner, provided as a helper function
+#with no arguments, it iteratively prunes as per Sullivan et al 2020
+#i.e. culls all nodes with indegree + outdegree <= 1, takes the largest connected component, and iterates until stable
+#it also adds the possibility of a weight threshold, which is useful for bigger/denser graphs
+#I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs 
+
+def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
+
+
+    G = H.copy() #make a copy rather than editing in place
+    done = False
+    while not done:
+        done = True
+        if verbose:
+            print(len(G.nodes),len(G.edges))
+        nodes_to_cut = []
+
+        #this part directly from original paper
+        #but accomodate directed and undirected
+        if G.is_directed():
+            for node in G:
+
+                i = G.in_degree(node)
+                o = G.out_degree(node)
+                if i+0<=threshold:
+                    nodes_to_cut.append(node)
+        else:
+            for node in G:
+                d = G.degree(node)
+                if d<=threshold:
+                    nodes_to_cut.append(node)
+
+        if len(nodes_to_cut) >0:
+            done = False
+            G.remove_nodes_from(nodes_to_cut)
+
+        if weight_threshold == None:
+            pass
+        else:
+
+            edges_to_cut = []
+            for edge in G.edges:
+                if G.edges[edge]['weight'] <= weight_threshold:
+                    edges_to_cut.append(edge)
+
+            if len(edges_to_cut) > 0:
+                done = False
+                G.remove_edges_from(edges_to_cut)
+
+        #now greatest connected component
+        if not done:
+            if G.is_directed():
+                T = nx.Graph(G) #squash to undirected if necessary, b/c not defined for directed.
+            else:
+                T = G
+            Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
+            G = nx.DiGraph(G.subgraph(Gcc[0]))
+
+    return G
