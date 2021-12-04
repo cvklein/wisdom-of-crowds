@@ -5,10 +5,10 @@ from networkx.exception import NetworkXNoPath
 import warnings
 
 class Crowd:
-    """ 
-    Class for encapsulating a graph and pre-computed (memoized) features for the 
+    """
+    Class for encapsulating a graph and pre-computed (memoized) features for the
     Wisdom of Crowds algorithm, per Sullivan et al. (2020),
-    "Vulnerability in Social Epistemic Networks" *International Journal of Philosophical Studies* 
+    "Vulnerability in Social Epistemic Networks" *International Journal of Philosophical Studies*
     https://doi.org/10.1080/09672559.2020.1782562
     :param G: a networkx graph, typically DiGraph.
     :param max_m: maximum m to consider in the calculations
@@ -31,7 +31,7 @@ class Crowd:
         # if G is okay, we 'hash' the graph data to prevent external updates breaking internal caches
         # NB: weisfeiler_lehman_graph_hash(G) is the best, but is very performance-draining
         self.node_set = set(G.nodes())
-        self.edge_set = set(G.edges())  
+        self.edge_set = set(G.edges())
 
     def __efficient_pairs(self, x):
         """
@@ -49,8 +49,8 @@ class Crowd:
     def __shortest_path_node_source_target(self, v, source, target):
         """
         __shortest_path_node_source_target: internal function,
-            to get the length of the shortest path between vertices source and target, excluding v. 
-            The results need to be postprocessed by wrapper function 
+            to get the length of the shortest path between vertices source and target, excluding v.
+            The results need to be postprocessed by wrapper function
             shortest_path_length_node_source_target and not called directly.
             This function does memoization for efficient future processing:
             for a single node, and a single source, precompute the path,
@@ -60,7 +60,7 @@ class Crowd:
         :param target: target node
         :returns: integer z, in range 0 <= z < +infinity (unadjusted)
         """
-        # error checking: 'v' needs to exist. 
+        # error checking: 'v' needs to exist.
         # (missing 'source' and 'target' raised by nx)
         if v not in nx.nodes(self.G):
             raise nx.NodeNotFound
@@ -82,8 +82,8 @@ class Crowd:
         # step 2 check if this is also a path without the node of interest
         if v not in shortest_unconditional_path:
             return shortest_unconditional_path
-        # now we have to find the shortest path in a subgraph without the node of interest    
-        else: 
+        # now we have to find the shortest path in a subgraph without the node of interest
+        else:
             try:
                 shortest_conditional_path = self.precomputed_paths_by_hole_node[v][(source,target)]
                 return shortest_conditional_path
@@ -99,11 +99,11 @@ class Crowd:
                     self.precomputed_paths_by_hole_node[v][(source,target)] = []
                     return []
 
-    
+
     def shortest_path_length_node_source_target(self, v, source, target):
         """
         shortest_path_length_node_source_target: wrapper function to get the length of the
-            shortest path between vertices source and target, without vertex v. 
+            shortest path between vertices source and target, without vertex v.
             no path = infinite length
         :param v: vertex under consideration, as defined by (Sullivan et al., 2020)
         :param source: source node
@@ -114,8 +114,8 @@ class Crowd:
         if z == 0:
             return(float('inf'))
         else:
-            #z-1 because the path is a list of nodes incl start and end ; we're using distance=number of edges, which is 1 less. 
-            return z - 1 
+            #z-1 because the path is a list of nodes incl start and end ; we're using distance=number of edges, which is 1 less.
+            return z - 1
 
 
     def is_mk_observer(self, v, m, k):
@@ -125,12 +125,12 @@ class Crowd:
         :param v: vertex to evaluate
         :param m: m as defined in (Sullivan et al., 2020); m >= 1
         :param k: k as defined in (Sullivan et al., 2020); k > 1
-        :returns: boolean 
+        :returns: boolean
         """
         if m < 1 or k <= 1:
             raise ValueError('Crowd: m needs to be integer >= 1; k needs to be integer > 1.')
-        
-        # PRECONDITION 1: if original graph seems to be 'obsolete', 
+
+        # PRECONDITION 1: if original graph seems to be 'obsolete',
         if set(nx.nodes(self.G)) != self.node_set or set(nx.edges(self.G)) != self.edge_set:
             # and PRECONDITION 2: AND ONLY IF the user fails to call clear_path_dict...
             if not self.refresh_requested:
@@ -141,7 +141,7 @@ class Crowd:
                 # rehash the nodeset and edgeset so the graph is no longer detected as "changed"
                 # i.e. on next run, the graph is considered "stable" and there is no need to request a refresh
                 self.node_set = set(self.G.nodes())
-                self.edge_set = set(self.G.edges())  
+                self.edge_set = set(self.G.edges())
 
                 # user has confirmed that the cache has indeed been cleared.
                 assert self.precomputed_path_dict == {}
@@ -152,24 +152,24 @@ class Crowd:
         source_nodes = list(self.G.predecessors(v))
 
         # if you have fewer than k, then you can't hear from at least k
-        if len(source_nodes) < k: 
+        if len(source_nodes) < k:
             return False
 
         # special case, to ensure that a node with one input is a 1,1 observer
-        if (len(source_nodes) == 1) and k==1 and m==1: 
+        if (len(source_nodes) == 1) and k==1 and m==1:
             return True
 
         max_k_found = False
         clique_dict = defaultdict(list) # this will get used to look for cliques
 
-        # helper method __efficient_pairs makes sure that cliques are found and 
+        # helper method __efficient_pairs makes sure that cliques are found and
         # early termination happens as soon as possible
         for source_a,source_b in self.__efficient_pairs(source_nodes):
             a_path_length = self.shortest_path_length_node_source_target(v,source_a,source_b)
             b_path_length = self.shortest_path_length_node_source_target(v,source_b,source_a)
 
             # if shortest path is too short, keep looking
-            if (a_path_length<m) or (b_path_length<m): 
+            if (a_path_length<m) or (b_path_length<m):
                 pass
 
             else:  # now we do the clique updating
@@ -217,13 +217,13 @@ class Crowd:
         S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v
             S = max_{(m,k) in MK}(m * k)
         :param v: vertex to evaluate
-        :returns: integer S, in range 0 <= (class constant max_m * class constant max_k) 
+        :returns: integer S, in range 0 <= (class constant max_m * class constant max_k)
         """
         possibilities = sorted([(m*k, m, k) for m, k in \
             itertools.product(range(self.min_m, self.max_m+1), \
                               range(self.min_k, self.max_k+1))], \
             reverse=True)
-        
+
         for mk, m, k in possibilities:
             mk_observer = self.is_mk_observer(v, m, k)
             if mk_observer:
@@ -239,7 +239,7 @@ class Crowd:
             informants of vertex v per (Sullivan et al., 2020)
             We apply the general case D = D' = | union_{(u,v) in E} C'(u) |
         :param v: vertex to evaluate
-        :returns: integer D, in range 0 <= D 
+        :returns: integer D, in range 0 <= D
         """
         topics = set()
         source_nodes = self.G.predecessors(v)
@@ -270,17 +270,114 @@ class Crowd:
         :param max_h: maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
         :returns: integer h, in range 1 < h <= max_h
         """
-        for h in range(max_h, 1, -1): # recall (k > 1) 
+        for h in range(max_h, 1, -1): # recall (k > 1)
             if self.is_mk_observer(v, h, h):
                 return h
         return 0
-    
+
     def clear_path_dict(self):
         """
-        clear_path_dict: helper function to completely reset the precomputed path dictionary. 
-        Should be used if G is changed. 
+        clear_path_dict: helper function to completely reset the precomputed path dictionary.
+        Should be used if G is changed.
         """
-        self.precomputed_path_dict = {} 
-        self.precomputed_paths_by_hole_node = defaultdict(dict)  
+        self.precomputed_path_dict = {}
+        self.precomputed_paths_by_hole_node = defaultdict(dict)
         self.refresh_requested = True
-        return 
+        return
+
+
+#Now we add some additional helper functions
+
+
+#This makes the style of plot from Sullivan et al 2020
+#could be more generic, but essentially has two modes:
+#One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle
+#This will make and render a plot
+#Two, or else you can pass an axis (and optionally colormap and suptitle)
+#and this will render it on the axis, allowing for multiple plots (as done in the paper figures)
+
+def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
+
+    if cmap==None:
+        cmap = plt.get_cmap('gist_yarg')
+    norm = Normalize(vmin=min(ds)-1,vmax=max(ds)+1)
+
+    #sort by pi, then d, to
+    z = sorted([(pi,d,s) for pi,d,s in zip(pis,ds,ses)])
+    pis = [pi for pi,d,s in z]
+    sds = [(s,d) for pi,d,s in z]
+
+    #make the pi values first
+    total = len(pis)
+    c = Counter(pis)
+    cumulative = 0
+
+    xs = [0]
+    ys = [0]
+
+    for pi in c:
+        xs.append(cumulative)
+        ys.append(ys[-1])
+        xs.append(cumulative)
+        ys.append(pi)
+        cumulative += c[pi] / total
+
+
+    #now build up the bar graph
+    sdcounter = Counter(sds)
+    total = len(pis)
+    current_x = 0
+    cumulative = 0
+
+    barx = []
+    barwidth = []
+    barheight = []
+    barcolors = []
+    seen = []
+    for pi,d,s in z:
+        if (pi,s,d) in seen:
+            pass
+        else:
+            barx.append(current_x)
+
+            cumulative += (sdcounter[(s,d)]/total)
+            current_x = cumulative
+
+            barwidth.append(sdcounter[(s,d)]/total)
+            barheight.append(s)
+            barcolors.append(cmap(norm(d)))
+            seen.append((pi,s,d))
+
+    #do the plot
+    if cax == None:
+        fig = plt.figure(figsize=(12,6),facecolor='w')
+        ax = fig.add_subplot(111)
+    else:
+        ax = cax
+
+
+
+    ax.bar(barx,barheight,width=barwidth,color=barcolors,align='edge')
+    ax.plot(xs,ys,c='k')
+
+    ax.set_xticks([0,0.2,0.4,0.6,0.8,1.0])
+    ax.set_xlim((0,1))
+    ax.set_xlabel('Proportion')
+    ax.yaxis.tick_right()
+    ax.yaxis.grid()
+    #make the legend for D
+
+    handles = []
+    for d in set(ds):
+        handles.append(mpatches.Patch(color=cmap(norm(d)), label="D="+str(d)))
+    ax.legend(handles=handles,loc='upper left')
+
+    ax.set_ylabel('S/pi')
+    if suptitle is not None:
+        ax.set_title(suptitle)
+
+    if cax==None:
+        plt.show()
+        return None
+    else:
+        return None
