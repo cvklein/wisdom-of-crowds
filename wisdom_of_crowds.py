@@ -387,7 +387,8 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
 #with no arguments, it iteratively prunes as per Sullivan et al 2020
 #i.e. culls all nodes with indegree + outdegree <= 1, takes the largest connected component, and iterates until stable
 #it also adds the possibility of a weight threshold, which is useful for bigger/denser graphs
-#I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs 
+#I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs
+
 
 def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
 
@@ -400,7 +401,7 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
             print(len(G.nodes),len(G.edges))
         nodes_to_cut = []
 
-        #this part directly from original paper
+        #this part directly from paper
         #but accomodate directed and undirected
         if G.is_directed():
             for node in G:
@@ -436,9 +437,11 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
         if not done:
             if G.is_directed():
                 T = nx.Graph(G) #squash to undirected if necessary, b/c not defined for directed.
+                Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
+                G = nx.DiGraph(G.subgraph(Gcc[0]))
             else:
                 T = G
-            Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
-            G = nx.DiGraph(G.subgraph(Gcc[0]))
+                Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
+                G = nx.Graph(G.subgraph(Gcc[0]))
 
     return G
