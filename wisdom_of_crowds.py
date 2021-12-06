@@ -401,7 +401,7 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
         return None
 
 
-def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
+def iteratively_prune_graph(H,threshold=1,weight_threshold=None,weight_key='weight',verbose=False):
     """
     iteratively_prune_graph
     Iterative graph pruner, provided as a helper function.
@@ -412,7 +412,8 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
 
     :param H: source graph - will not be modified. [NB: this is nx.Graph; NOT Crowd. An assertion will test for this.]
     :param threshold: (optional) threshold T where indegree+outdegree <= T
-    :param weight_threshold: (optional) allows specification of weights-per-edge
+    :param weight_threshold: (optional) allows specification of weights-per-edge. This throws an exception if edges are not weighted
+    :param weight_key: (optional) identifies key used for weight thresholding. Ignored if weight_threshold is not specified.
     :param verbose: (optional) debugging flag for verbose reporting
     """
     assert isinstance(H, nx.Graph)
@@ -456,8 +457,11 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
         else:
             edges_to_cut = []
             for edge in G.edges:
-                if G.edges[edge]['weight'] <= weight_threshold:
-                    edges_to_cut.append(edge)
+                try:
+                    if G.edges[edge][weight_key] <= weight_threshold:
+                        edges_to_cut.append(edge)
+                except KeyError:
+                    raise KeyError('Weight attribute for thresholding not present; failing')
 
             if len(edges_to_cut) > 0:
                 done = False
@@ -470,13 +474,13 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
                 Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
                 try:
                     G = nx.DiGraph(G.subgraph(Gcc[0]))
-                except KeyError:  #you have pruned away your graph, return a null graph rather than choke
+                except IndexError:  #you have pruned away your graph, return a null graph rather than choke
                     return nx.generators.classic.null_graph()
             else:
                 T = G
                 Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
                 try:
                     G = nx.Graph(G.subgraph(Gcc[0]))
-                except KeyError:  #you have pruned away your graph, return a null graph rather than choke
+                except IndexError:  #you have pruned away your graph, return a null graph rather than choke
                     return nx.generators.classic.null_graph()
     return G
