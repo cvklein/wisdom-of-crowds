@@ -3,6 +3,10 @@ from collections import defaultdict
 import itertools
 from networkx.exception import NetworkXNoPath
 import warnings
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.colors import Normalize
+from collections import Counter
 
 class Crowd:
     """
@@ -293,25 +297,26 @@ These can be called by importing them
     from wisdom_of_crowds import iteratively_prune_graph
 """
 
-def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
+def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
     """
     make_sullivanplot: This makes the style of plot from Sullivan et al (2020)
-    Could be more generic, but essentially has two modes:
+    cvk note: Could be more generic, but essentially has two modes:
     * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.
       This will make and render a plot
     * Two, or else you can pass an axis (and optionally colormap and suptitle)
       and this will render it on the axis, allowing for multiple plots (as done in the paper figures).
 
     :param pis: a list of pi-s
-    :param Ds:  a list of D-s
-    :param Ses: a list of S-s
-    :precondition: PRECONDITION: len(pis) == len(Ds) == len(Ses)
+    :param ds:  a list of D-s
+    :param ses: a list of S-s
+    :precondition: PRECONDITION: len(pis) == len(Ds) == len(Ses) == X, where len(X) > 0
     :param cmap: (optional) colormap
     :param suptitle: (optional) supplementary title
     :param cax:  (optional) axis to render on
-    :returns: nothing; but generates the plot in a plt window.
+    :returns: None on success; but generates the plot in a plt window.
     """
-    assert(len(pis) == len(Ds) == len(Ses))
+    assert(len(pis) == len(ds) == len(ses))
+    assert(len(pis) > 0)
 
     if cmap==None:
         cmap = plt.get_cmap('gist_yarg')
@@ -396,9 +401,6 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
         return None
 
 
-
-
-
 def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
     """
     iteratively_prune_graph
@@ -408,11 +410,13 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
     It also adds the possibility of a weight threshold, which is useful for bigger/denser graphs.
     cvk note: I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs
 
-    :param H: source graph - will not be modified
+    :param H: source graph - will not be modified. [NB: this is nx.Graph; NOT Crowd. An assertion will test for this.]
     :param threshold: (optional) threshold T where indegree+outdegree <= T
     :param weight_threshold: (optional) allows specification of weights-per-edge
     :param verbose: (optional) debugging flag for verbose reporting
     """
+    assert isinstance(H, nx.Graph)
+
     G = H.copy() #make a copy rather than editing in place
     done = False
     iteration = 0
