@@ -468,7 +468,10 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
             if G.is_directed():
                 T = nx.Graph(G) # squash to undirected if necessary, b/c not defined for directed.
                 Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
-                G = nx.DiGraph(G.subgraph(Gcc[0]))
+                try:
+                    G = nx.DiGraph(G.subgraph(Gcc[0]))
+                except KeyError:  #you have pruned away your graph, return a null graph rather than choke
+                    return nx.generators.classic.null_graph()
             else:
                 T = G
                 Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
