@@ -2,7 +2,7 @@ import pytest
 import warnings
 import networkx as nx
 import wisdom_of_crowds as woc
-
+import matplotlib
 
 def test_init():
     # check that one error was raised
@@ -361,4 +361,44 @@ def test_clear_path_dict():
     assert c.refresh_requested == True
     c.is_mk_observer('b',2,2) # this should NOT trigger an error
     assert c.refresh_requested == False
+
+
+# mock patch for pyplot.show - we don't want the plot window to pop up every time
+from unittest.mock import patch
+@patch('matplotlib.pyplot.show')
+def test_make_sullivanplot(mock_show):
+    # case: pass lists of imbalanced-length [pis, Ds, Ses]
+    with pytest.raises(AssertionError):
+        woc.make_sullivanplot([1,2],[1],[1])
+    with pytest.raises(AssertionError):
+        woc.make_sullivanplot([1],[1,2],[1])
+    with pytest.raises(AssertionError):
+        woc.make_sullivanplot([1],[1],[1,2])
+
+    # case: pass lists of 0-length
+    with pytest.raises(AssertionError):
+        woc.make_sullivanplot([],[],[])   
+
+    # case: pass basic and optional params for standard runs; should return None successfully
+    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]) == None
+    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], suptitle="Test") == None
+    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cmap = matplotlib.cm.get_cmap('Spectral')) == None
+    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cax = matplotlib.pyplot.axes()) == None
+
+
+def test_iteratively_prune_graph():
+    # case: pass a Crowd instead
+    with pytest.raises(AssertionError):
+        woc.iteratively_prune_graph(__construct_florentine_bidirectional())
+
+    # case: standard graph for Florentine
+    H = nx.generators.social.florentine_families_graph()
+    G = woc.iteratively_prune_graph(H)
+
+    # case: Florentine, with threshold=2
+    G = woc.iteratively_prune_graph(H, threshold=2)
+    for e in G.edges:
+        warnings.warn( str(e))
+
+
 
