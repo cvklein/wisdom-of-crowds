@@ -286,28 +286,43 @@ class Crowd:
         return
 
 
-#Now we add some additional helper functions
-
-
-#This makes the style of plot from Sullivan et al 2020
-#could be more generic, but essentially has two modes:
-#One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle
-#This will make and render a plot
-#Two, or else you can pass an axis (and optionally colormap and suptitle)
-#and this will render it on the axis, allowing for multiple plots (as done in the paper figures)
+"""
+Now we add some additional utility/helper functions that are public-facing
+These can be called by importing them
+    from wisdom_of_crowds import make_sullivanplot
+    from wisdom_of_crowds import iteratively_prune_graph
+"""
 
 def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
+    """
+    make_sullivanplot: This makes the style of plot from Sullivan et al (2020)
+    Could be more generic, but essentially has two modes:
+    * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.
+      This will make and render a plot
+    * Two, or else you can pass an axis (and optionally colormap and suptitle)
+      and this will render it on the axis, allowing for multiple plots (as done in the paper figures).
+
+    :param pis: a list of pi-s
+    :param Ds:  a list of D-s
+    :param Ses: a list of S-s
+    :precondition: PRECONDITION: len(pis) == len(Ds) == len(Ses)
+    :param cmap: (optional) colormap
+    :param suptitle: (optional) supplementary title
+    :param cax:  (optional) axis to render on
+    :returns: nothing; but generates the plot in a plt window.
+    """
+    assert(len(pis) == len(Ds) == len(Ses))
 
     if cmap==None:
         cmap = plt.get_cmap('gist_yarg')
     norm = Normalize(vmin=min(ds)-1,vmax=max(ds)+1)
 
-    #sort by pi, then d, to
+    # sort by pi, then d, to
     z = sorted([(pi,d,s) for pi,d,s in zip(pis,ds,ses)])
     pis = [pi for pi,d,s in z]
     sds = [(s,d) for pi,d,s in z]
 
-    #make the pi values first
+    # make the pi values first
     total = len(pis)
     c = Counter(pis)
     cumulative = 0
@@ -323,7 +338,7 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
         cumulative += c[pi] / total
 
 
-    #now build up the bar graph
+    # now build up the bar graph
     sdcounter = Counter(sds)
     total = len(pis)
     current_x = 0
@@ -348,14 +363,12 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
             barcolors.append(cmap(norm(d)))
             seen.append((pi,s,d))
 
-    #do the plot
+    # do the plot - inplace in existing axes (cax), otherwise create a new one.
     if cax == None:
         fig = plt.figure(figsize=(12,6),facecolor='w')
         ax = fig.add_subplot(111)
     else:
         ax = cax
-
-
 
     ax.bar(barx,barheight,width=barwidth,color=barcolors,align='edge')
     ax.plot(xs,ys,c='k')
@@ -365,8 +378,8 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
     ax.set_xlabel('Proportion')
     ax.yaxis.tick_right()
     ax.yaxis.grid()
-    #make the legend for D
-
+    
+    # make the legend for D
     handles = []
     for d in set(ds):
         handles.append(mpatches.Patch(color=cmap(norm(d)), label="D="+str(d)))
@@ -383,29 +396,43 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None):
         return None
 
 
-#iterative graph pruner, provided as a helper function
-#with no arguments, it iteratively prunes as per Sullivan et al 2020
-#i.e. culls all nodes with indegree + outdegree <= 1, takes the largest connected component, and iterates until stable
-#it also adds the possibility of a weight threshold, which is useful for bigger/denser graphs
-#I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs
+
 
 
 def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
+    """
+    iteratively_prune_graph
+    Iterative graph pruner, provided as a helper function.
+    With no arguments, it iteratively prunes as per Sullivan et al 2020
+    i.e. culls all nodes with indegree + outdegree <= 1, takes the largest connected component, and iterates until stable.
+    It also adds the possibility of a weight threshold, which is useful for bigger/denser graphs.
+    cvk note: I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs
 
-
+    :param H: source graph - will not be modified
+    :param threshold: (optional) threshold T where indegree+outdegree <= T
+    :param weight_threshold: (optional) allows specification of weights-per-edge
+    :param verbose: (optional) debugging flag for verbose reporting
+    """
     G = H.copy() #make a copy rather than editing in place
     done = False
+    iteration = 0
+
+    if verbose:
+        print(f'[iteratively_prune_graph: threshold={threshold}, weight_threshold={weight_threshold}, verbose.]')
+
     while not done:
+        iteration += 1
         done = True
         if verbose:
+            print(f'\n\nIteration #{iteration}...')
+            print('================================')
             print(len(G.nodes),len(G.edges))
         nodes_to_cut = []
 
-        #this part directly from paper
-        #but accomodate directed and undirected
+        # this part directly from paper
+        # but accomodate directed and undirected
         if G.is_directed():
             for node in G:
-
                 i = G.in_degree(node)
                 o = G.out_degree(node)
                 if i+0<=threshold:
@@ -416,14 +443,13 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
                 if d<=threshold:
                     nodes_to_cut.append(node)
 
-        if len(nodes_to_cut) >0:
+        if len(nodes_to_cut) > 0:
             done = False
             G.remove_nodes_from(nodes_to_cut)
 
         if weight_threshold == None:
             pass
         else:
-
             edges_to_cut = []
             for edge in G.edges:
                 if G.edges[edge]['weight'] <= weight_threshold:
@@ -433,10 +459,10 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
                 done = False
                 G.remove_edges_from(edges_to_cut)
 
-        #now greatest connected component
+        # now greatest connected component
         if not done:
             if G.is_directed():
-                T = nx.Graph(G) #squash to undirected if necessary, b/c not defined for directed.
+                T = nx.Graph(G) # squash to undirected if necessary, b/c not defined for directed.
                 Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
                 G = nx.DiGraph(G.subgraph(Gcc[0]))
             else:
@@ -444,4 +470,5 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,verbose=False):
                 Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
                 G = nx.Graph(G.subgraph(Gcc[0]))
 
+    # recall G is a deepcopy of H, hence original graph unaltered
     return G
