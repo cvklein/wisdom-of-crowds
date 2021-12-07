@@ -153,7 +153,10 @@ class Crowd:
                 # disable the error detector for future runs (until the graph is tampered-with, again)
                 self.refresh_requested = False
 
-        source_nodes = list(self.G.predecessors(v))
+        if G.is_directed():
+            source_nodes = list(self.G.predecessors(v))
+        else:
+            source_nodes = list(self.G.neighbors(v))
 
         # if you have fewer than k, then you can't hear from at least k
         if len(source_nodes) < k:
@@ -468,14 +471,14 @@ def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='w
             if len(edges_to_cut) > 0:
                 done = False
                 G.remove_edges_from(edges_to_cut)
-                
+
         # now greatest connected component - only one difference between graph and digraph: i.e. to squash digraph.
         if not done:
             if G.is_directed():
                 T = nx.Graph(G) # squash to undirected if necessary, b/c not defined for directed.
             else:
                 T = G
-            
+
             Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
             try:
                 G = nx.Graph(G.subgraph(Gcc[0]))
