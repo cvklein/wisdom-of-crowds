@@ -401,7 +401,7 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
         return None
 
 
-def iteratively_prune_graph(H,threshold=1,weight_threshold=None,weight_key='weight',verbose=False):
+def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='weight', verbose=False):
     """
     iteratively_prune_graph
     Iterative graph pruner, provided as a helper function.
@@ -416,7 +416,8 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,weight_key='weig
     :param weight_key: (optional) identifies key used for weight thresholding. Ignored if weight_threshold is not specified.
     :param verbose: (optional) debugging flag for verbose reporting
     """
-    assert isinstance(H, nx.Graph)
+    if not isinstance(H, nx.Graph):
+        raise TypeError('The helper function iteratively_prune_graph expects a Graph, not Crowd.')
 
     G = H.copy() #make a copy rather than editing in place
     done = False
@@ -440,18 +441,19 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,weight_key='weig
             for node in G:
                 i = G.in_degree(node)
                 o = G.out_degree(node)
-                if i+0<=threshold:
+                if i + o <= threshold:
                     nodes_to_cut.append(node)
         else:
             for node in G:
                 d = G.degree(node)
-                if d<=threshold:
+                if d <= threshold:
                     nodes_to_cut.append(node)
 
         if len(nodes_to_cut) > 0:
             done = False
             G.remove_nodes_from(nodes_to_cut)
 
+        # then do the weighted-edge culling
         if weight_threshold == None:
             pass
         else:
@@ -461,26 +463,22 @@ def iteratively_prune_graph(H,threshold=1,weight_threshold=None,weight_key='weig
                     if G.edges[edge][weight_key] <= weight_threshold:
                         edges_to_cut.append(edge)
                 except KeyError:
-                    raise KeyError('Weight attribute for thresholding not present; failing')
+                    raise KeyError('Weight attribute for thresholding not present; failing.')
 
             if len(edges_to_cut) > 0:
                 done = False
                 G.remove_edges_from(edges_to_cut)
-
-        # now greatest connected component
+                
+        # now greatest connected component - only one difference between graph and digraph: i.e. to squash digraph.
         if not done:
             if G.is_directed():
                 T = nx.Graph(G) # squash to undirected if necessary, b/c not defined for directed.
-                Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
-                try:
-                    G = nx.DiGraph(G.subgraph(Gcc[0]))
-                except IndexError:  #you have pruned away your graph, return a null graph rather than choke
-                    return nx.generators.classic.null_graph()
             else:
                 T = G
-                Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
-                try:
-                    G = nx.Graph(G.subgraph(Gcc[0]))
-                except IndexError:  #you have pruned away your graph, return a null graph rather than choke
-                    return nx.generators.classic.null_graph()
+            
+            Gcc = sorted(nx.connected_components(T), key=len, reverse=True)
+            try:
+                G = nx.Graph(G.subgraph(Gcc[0]))
+            except IndexError:  # you have pruned away your graph, return a null graph rather than choke
+                return nx.generators.classic.null_graph()
     return G

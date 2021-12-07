@@ -388,17 +388,55 @@ def test_make_sullivanplot(mock_show):
 
 def test_iteratively_prune_graph():
     # case: pass a Crowd instead
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         woc.iteratively_prune_graph(__construct_florentine_bidirectional())
 
-    # case: standard graph for Florentine
+    # case: standard graph for Florentine, threshold=1
+    # first pass removes Pucci, Lamberteschi, Ginori, Acciaiuoli, Pazzi;
+    # second pass removes Salviati
     H = nx.generators.social.florentine_families_graph()
     G = woc.iteratively_prune_graph(H)
+    for existing in ['Albizzi', 'Guadagni', 'Bischeri', 'Peruzzi', 'Castellani', \
+                    'Barbadori', 'Medici', 'Tornabuoni', 'Ridolfi', 'Strozzi']:
+        assert existing in G.nodes
+    for removed in ['Pucci', 'Lamberteschi', 'Ginori', 'Acciaiuoli', 'Salviati', 'Pazzi']:
+        assert removed not in G.nodes
 
-    # case: Florentine, with threshold=2
+    # case: DIgraph for Florentine, threshold=1
+    # should have everything intact, except the isolated Pucci
+    # as the digraph effectively doubles the degree (--- = --> + <--) per node
+    DH = H.to_directed()
+    DG = woc.iteratively_prune_graph(DH)
+    for existing in ['Albizzi', 'Guadagni', 'Bischeri', 'Peruzzi', 'Castellani', \
+                    'Barbadori', 'Medici', 'Tornabuoni', 'Ridolfi', 'Strozzi',
+                    'Lamberteschi', 'Ginori', 'Acciaiuoli', 'Salviati', 'Pazzi']:
+        assert existing in DG.nodes
+    for removed in ['Pucci']:
+        assert removed not in DG.nodes
+        
+    # case: standard graph for Florentine, with threshold=2; should be a null graph
     G = woc.iteratively_prune_graph(H, threshold=2)
-    for e in G.edges:
-        warnings.warn( str(e))
+    assert len(G.edges) == len(G.nodes) == 0
+    
+    # case: pass a graph without edgeweights despite specifying so.
+    with pytest.raises(KeyError):
+        G = woc.iteratively_prune_graph(H, weight_threshold=2, weight_key='no-such-key')
+
+    # case: standard graph for Florentine, threshold=1; with
+    # edge culling threshold=2 - only one triangle should remain (with edgeweights=100)
+    H = nx.generators.social.florentine_families_graph()
+    nx.set_edge_attributes(H, 1, 'edgeweight')
+    H.edges['Medici','Ridolfi']['edgeweight'] = 100
+    H.edges['Medici','Tornabuoni']['edgeweight'] = 100
+    H.edges['Ridolfi','Tornabuoni']['edgeweight'] = 100
+    G = woc.iteratively_prune_graph(H, weight_threshold=2, weight_key='edgeweight')
+    for existing in ['Ridolfi', 'Medici', 'Tornabuoni']:
+        assert existing in G.nodes
+    for removed in ['Guadagni', 'Bischeri', 'Peruzzi', 'Castellani', 'Barbadori', \
+                    'Albizzi', 'Strozzi', 'Lamberteschi', 'Ginori', 'Acciaiuoli', \
+                    'Salviati', 'Pazzi', 'Pucci']:
+        assert removed not in G.nodes
+
 
 
 
