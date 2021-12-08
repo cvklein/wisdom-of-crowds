@@ -300,7 +300,7 @@ These can be called by importing them
     from wisdom_of_crowds import iteratively_prune_graph
 """
 
-def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
+def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None,yscale='linear'):
     """
     make_sullivanplot: This makes the style of plot from Sullivan et al (2020)
     cvk note: Could be more generic, but essentially has two modes:
@@ -320,17 +320,16 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
     """
     assert(len(pis) == len(ds) == len(ses))
     assert(len(pis) > 0)
-
     if cmap==None:
         cmap = plt.get_cmap('gist_yarg')
     norm = Normalize(vmin=min(ds)-1,vmax=max(ds)+1)
 
-    # sort by pi, then d, to
+    #sort by pi, then d
     z = sorted([(pi,d,s) for pi,d,s in zip(pis,ds,ses)])
     pis = [pi for pi,d,s in z]
     sds = [(s,d) for pi,d,s in z]
 
-    # make the pi values first
+    #make the pi values first
     total = len(pis)
     c = Counter(pis)
     cumulative = 0
@@ -346,7 +345,7 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
         cumulative += c[pi] / total
 
 
-    # now build up the bar graph
+    #now build up the bar graph
     sdcounter = Counter(sds)
     total = len(pis)
     current_x = 0
@@ -371,35 +370,40 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None):
             barcolors.append(cmap(norm(d)))
             seen.append((pi,s,d))
 
-    # do the plot - inplace in existing axes (cax), otherwise create a new one.
+    #do the plot
     if cax == None:
         fig = plt.figure(figsize=(12,6),facecolor='w')
         ax = fig.add_subplot(111)
     else:
         ax = cax
 
+
+
     ax.bar(barx,barheight,width=barwidth,color=barcolors,align='edge')
     ax.plot(xs,ys,c='k')
 
     ax.set_xticks([0,0.2,0.4,0.6,0.8,1.0])
     ax.set_xlim((0,1))
-    ax.set_xlabel('Proportion')
+
     ax.yaxis.tick_right()
     ax.yaxis.grid()
+    #make the legend for D
 
-    # make the legend for D
     handles = []
     for d in set(ds):
         handles.append(mpatches.Patch(color=cmap(norm(d)), label="D="+str(d)))
     ax.legend(handles=handles,loc='upper left')
 
-    ax.set_ylabel('S/pi')
+    ax.set_yscale(yscale)
+
     if suptitle is not None:
         ax.set_title(suptitle)
 
     if cax==None:
         plt.show()
         return None
+        ax.set_xlabel('Proportion')
+        ax.set_ylabel('S/pi')
     else:
         return None
 
