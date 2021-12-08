@@ -404,6 +404,7 @@ def test_make_sullivanplot(mock_show):
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], suptitle="Test") == None
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cmap = matplotlib.cm.get_cmap('Spectral')) == None
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cax = matplotlib.pyplot.axes()) == None
+    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], yscale="linear") == None
 
 
 def test_iteratively_prune_graph():

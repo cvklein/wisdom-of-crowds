@@ -300,7 +300,7 @@ These can be called by importing them
     from wisdom_of_crowds import iteratively_prune_graph
 """
 
-def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None,yscale='linear'):
+def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None, yscale='linear'):
     """
     make_sullivanplot: This makes the style of plot from Sullivan et al (2020)
     cvk note: Could be more generic, but essentially has two modes:
@@ -324,12 +324,12 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None,yscale='linear
         cmap = plt.get_cmap('gist_yarg')
     norm = Normalize(vmin=min(ds)-1,vmax=max(ds)+1)
 
-    #sort by pi, then d
+    # sort by pi, then d
     z = sorted([(pi,d,s) for pi,d,s in zip(pis,ds,ses)])
     pis = [pi for pi,d,s in z]
     sds = [(s,d) for pi,d,s in z]
 
-    #make the pi values first
+    # make the pi values first
     total = len(pis)
     c = Counter(pis)
     cumulative = 0
@@ -345,7 +345,7 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None,yscale='linear
         cumulative += c[pi] / total
 
 
-    #now build up the bar graph
+    # now build up the bar graph
     sdcounter = Counter(sds)
     total = len(pis)
     current_x = 0
@@ -370,14 +370,12 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None,yscale='linear
             barcolors.append(cmap(norm(d)))
             seen.append((pi,s,d))
 
-    #do the plot
+    # do the plot
     if cax == None:
         fig = plt.figure(figsize=(12,6),facecolor='w')
         ax = fig.add_subplot(111)
     else:
         ax = cax
-
-
 
     ax.bar(barx,barheight,width=barwidth,color=barcolors,align='edge')
     ax.plot(xs,ys,c='k')
@@ -387,8 +385,8 @@ def make_sullivanplot(pis,ds,ses,cmap=None,suptitle=None,cax=None,yscale='linear
 
     ax.yaxis.tick_right()
     ax.yaxis.grid()
-    #make the legend for D
-
+    
+    # make the legend for D
     handles = []
     for d in set(ds):
         handles.append(mpatches.Patch(color=cmap(norm(d)), label="D="+str(d)))
