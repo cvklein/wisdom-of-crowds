@@ -129,6 +129,14 @@ def __construct_test_crowd_4nodes_linkedlist():
     c = woc.Crowd(DG) 
     return c
 
+def __construct_test_crowd_4nodes_undirected_linklist():
+    # a-b-c-d
+    UG = nx.Graph()
+    UG.add_edge('a','b')
+    UG.add_edge('b','c')
+    UG.add_edge('c','d')
+    uc = woc.Crowd(UG) 
+    return uc
 
 def __construct_test_crowd_5nodes_shortcut(attrib='T'):
     # a->b->c->d<->e
@@ -216,6 +224,18 @@ def test_is_mk_observer():
                 assert c.is_mk_observer('d',i,j) == True
             else:
                 assert c.is_mk_observer('d',i,j) == False
+
+    # cases: simple 4-nodes but converted to UNDIRECTED
+    c = __construct_test_crowd_4nodes_undirected_linklist()
+    for i in range(1,6,1):
+        for j in range(1,6,1): # (k > 1)
+            if j==1:
+                with pytest.raises(ValueError):
+                    c.is_mk_observer('c',i,j)
+            elif j==2:
+                assert c.is_mk_observer('c',i,j) == True
+            else:
+                assert c.is_mk_observer('c',i,j) == False
 
     # cases: Florentine graph, considering node=Medici
     c = __construct_florentine_bidirectional()

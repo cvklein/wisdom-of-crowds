@@ -153,7 +153,7 @@ class Crowd:
                 # disable the error detector for future runs (until the graph is tampered-with, again)
                 self.refresh_requested = False
 
-        if G.is_directed():
+        if self.G.is_directed():
             source_nodes = list(self.G.predecessors(v))
         else:
             source_nodes = list(self.G.neighbors(v))
