@@ -68,7 +68,7 @@ def test__shortest_path_node_source_target():
     # with pytest.warns(Warning, match='Performance warning'):
     #     c.G.add_edge('x','y')
     #     c._Crowd__shortest_path_node_source_target('b','x','y')
-    
+
     # case: no such node(s), expect nx.NodeNotFound to be raised by either Crowd or Graph
     c = __construct_test_crowd_ab_only()
     with pytest.raises(nx.NodeNotFound):
@@ -126,7 +126,7 @@ def __construct_test_crowd_4nodes_linkedlist():
     DG.add_edge('a','b')
     DG.add_edge('b','c')
     DG.add_edge('c','d')
-    c = woc.Crowd(DG) 
+    c = woc.Crowd(DG)
     return c
 
 def __construct_test_crowd_4nodes_undirected_linklist():
@@ -135,7 +135,7 @@ def __construct_test_crowd_4nodes_undirected_linklist():
     UG.add_edge('a','b')
     UG.add_edge('b','c')
     UG.add_edge('c','d')
-    uc = woc.Crowd(UG) 
+    uc = woc.Crowd(UG)
     return uc
 
 def __construct_test_crowd_5nodes_shortcut(attrib='T'):
@@ -171,13 +171,13 @@ def __construct_florentine_bidirectional():
     # Jackson, M. O. (2010). Social and economic networks. Princeton University Press.
     # Wasserman S. & Faust, K. (1994). Social Network Analysis: Methods and Applications. Cambridge University Press.
 
-    # The networkx generator methodology is discussed in 
+    # The networkx generator methodology is discussed in
     # https://networkx.org/documentation/stable/reference/generated/networkx.generators.social.florentine_families_graph.html
     UG = nx.generators.social.florentine_families_graph()
     DG = UG.to_directed()
 
     # note that networkx's generator does not return the isolated node 'Pucci',
-    # which is present in e.g. Jackson (2010) and Wasserman & Faust (1994)... 
+    # which is present in e.g. Jackson (2010) and Wasserman & Faust (1994)...
     # ... to add it manually
     DG.add_node('Pucci')
 
@@ -197,9 +197,9 @@ def test_is_mk_observer():
     c = __construct_test_crowd_ab_only()
     # cases: invalid m,k-s, missing v's
     with pytest.raises(ValueError):
-        c.is_mk_observer('a',-1,-1) 
+        c.is_mk_observer('a',-1,-1)
     with pytest.raises(ValueError):
-        c.is_mk_observer('a',0,0) 
+        c.is_mk_observer('a',0,0)
     with pytest.raises(ValueError):
         c.is_mk_observer('a',1,1)
     with pytest.raises(nx.exception.NetworkXError):
@@ -213,7 +213,7 @@ def test_is_mk_observer():
         c.is_mk_observer('b',2,2)
 
     # cases: simple 5-nodes as above
-    c = __construct_test_crowd_5nodes_shortcut()  
+    c = __construct_test_crowd_5nodes_shortcut()
     for i in range(1,6,1):
         for j in range(1,6,1): # (k > 1)
             #warnings.warn(str(i) + str(j) + str(c.is_mk_observer('d',i,j)))
@@ -279,7 +279,7 @@ def test_S():
         c.S('missing')
 
     # case: simple 5-nodes as above
-    c = __construct_test_crowd_5nodes_shortcut()  
+    c = __construct_test_crowd_5nodes_shortcut()
     assert c.S('d') == 5*2 # largest combo c.is_mk_observer('d',5,2)
 
     # case: Florentine graph, considering node=Medici
@@ -295,7 +295,7 @@ def test_D():
 
     # case: no such attrib, given default node_key = 'T'
     assert c.D('a') == 0
-    
+
     # case: using default node_key = 'T'
     c = __construct_test_crowd_5nodes_withattrib('T')
     assert c.D('e') == 2  # d=N, a=Y, topics=len(YN)=2
@@ -329,7 +329,7 @@ def test_pi():
     c = __construct_florentine_bidirectional()
     assert c.pi('Medici') == c.S('Medici')*c.D('Medici') == 20*2
 
-    
+
 def test_h_measure():
     c = __construct_test_crowd_ab_only()
     # case: missing v's
@@ -337,11 +337,11 @@ def test_h_measure():
         c.S('missing')
 
     # case: simple 5-nodes as above
-    c = __construct_test_crowd_5nodes_shortcut()  
+    c = __construct_test_crowd_5nodes_shortcut()
     assert c.h_measure('d') == 2 # i = 2 === k = 2 max (per is_mk_observer)
 
     # cases simple 5-nodes as above, constrained h=k=2
-    c = __construct_test_crowd_5nodes_shortcut()  
+    c = __construct_test_crowd_5nodes_shortcut()
     assert c.h_measure('d', max_h=2) == 2 # i = 1 === k = 1 max (per is_mk_observer)
 
     # case: Florentine graph, considering node=Medici
@@ -397,12 +397,12 @@ def test_make_sullivanplot(mock_show):
 
     # case: pass lists of 0-length
     with pytest.raises(AssertionError):
-        woc.make_sullivanplot([],[],[])   
+        woc.make_sullivanplot([],[],[])
 
     # case: pass basic and optional params for standard runs; should return None successfully
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]) == None
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], suptitle="Test") == None
-    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cmap = matplotlib.cm.get_cmap('Spectral')) == None
+    assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], colormap = 'Spectral') == None
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cax = matplotlib.pyplot.axes()) == None
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], yscale="linear") == None
 
@@ -434,11 +434,11 @@ def test_iteratively_prune_graph():
         assert existing in DG.nodes
     for removed in ['Pucci']:
         assert removed not in DG.nodes
-        
+
     # case: standard graph for Florentine, with threshold=2; should be a null graph
     G = woc.iteratively_prune_graph(H, threshold=2)
     assert len(G.edges) == len(G.nodes) == 0
-    
+
     # case: pass a graph without edgeweights despite specifying so.
     with pytest.raises(KeyError):
         G = woc.iteratively_prune_graph(H, weight_threshold=2, weight_key='no-such-key')
@@ -457,7 +457,3 @@ def test_iteratively_prune_graph():
                     'Albizzi', 'Strozzi', 'Lamberteschi', 'Ginori', 'Acciaiuoli', \
                     'Salviati', 'Pazzi', 'Pucci']:
         assert removed not in G.nodes
-
-
-
-

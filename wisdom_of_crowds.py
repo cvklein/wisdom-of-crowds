@@ -300,7 +300,7 @@ These can be called by importing them
     from wisdom_of_crowds import iteratively_prune_graph
 """
 
-def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None, yscale='linear'):
+def make_sullivanplot(pis, ds, ses, colormap='gist_yarg', suptitle=None, cax=None, yscale='linear'):
     """
     make_sullivanplot: This makes the style of plot from Sullivan et al (2020)
     cvk note: Could be more generic, but essentially has two modes:
@@ -313,15 +313,16 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None, yscale='
     :param ds:  a list of D-s
     :param ses: a list of S-s
     :precondition: PRECONDITION: len(pis) == len(Ds) == len(Ses) == X, where len(X) > 0
-    :param cmap: (optional) colormap
+    :param colormap: (optional) name of a colormap, defaults to 'gist_yarg'
     :param suptitle: (optional) supplementary title
     :param cax:  (optional) axis to render on
+    :param yscale: (optional) scale of y-axis. Defaults to linear.
     :returns: None on success; but generates the plot in a plt window.
     """
     assert(len(pis) == len(ds) == len(ses))
     assert(len(pis) > 0)
-    if cmap==None:
-        cmap = plt.get_cmap('gist_yarg')
+
+    cmap = plt.get_cmap(colormap)
     norm = Normalize(vmin=min(ds)-1,vmax=max(ds)+1)
 
     # sort by pi, then d
@@ -385,7 +386,7 @@ def make_sullivanplot(pis, ds, ses, cmap=None, suptitle=None, cax=None, yscale='
 
     ax.yaxis.tick_right()
     ax.yaxis.grid()
-    
+
     # make the legend for D
     handles = []
     for d in set(ds):
