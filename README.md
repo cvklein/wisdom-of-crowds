@@ -13,7 +13,7 @@ The package itself provides a single class ``Crowd()`` which is initialized with
 
 There is also a function ``D(node)`` that returns the *diversity* of a node, defined as the number of distinct  sources from which a node receives testimony. This requires an  attribute (default `'T'`) which is used to query either inbound nodes or edges (edges not yet implemented). The attribute may yield a single value or a set of values.  ``D(node)`` is defined as the number of distinct values  across all source nodes/edges.  Finally, ``pi(node)`` is defined as D*S.
 
-By convention, a node with a single input is an 1,1-observer. As per Sullivan et al, ``S`` is not calculated for k<2, so a node with a single input or one input has S=0.
+As per Sullivan et al, ``S`` is not calculated for k<2, so a node with zero or one inputs has S=0.
 
 ### Implementation notes
 
