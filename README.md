@@ -11,7 +11,7 @@ The package itself provides a single class ``Crowd()`` which is initialized with
 
 ``Crowd()`` allows for computation of several functions directly. Most functions call ``is_mk_observer(node,m,k)`` The function ``S(node)`` gives the max m\*k for which  node is an m,k-observer. The function ``h_measure(node)`` returns the max h such that node is an h,h-observer (compare to the h-index).
 
-There is also a function ``D(node)`` that returns the *diversity* of a node, defined as the number of distinct  sources from which a node receives testimony. This requires an  attribute (default `'T'`) which is used to query either inbound nodes or edges (edges not yet implemented). The attribute may yield a single value or a set of values.  ``D(node)`` is defined as the number of distinct values  across all source nodes/edges.  Finally, ``pi(node)`` is defined as D*S.
+There is also a function ``D(node)`` that returns the *diversity* of a node, defined as the number of distinct  sources from which a node receives testimony. This requires an  attribute (default `'T'`) which is used to query inbound nodes. The attribute may yield a single value or a set of values.  ``D(node)`` is defined as the number of distinct values  across all source nodes/edges.  Finally, ``pi(node)`` is defined as D*S.
 
 As per Sullivan et al, ``S`` is not calculated for k<2, so a node with zero or one inputs has S=0.
 
