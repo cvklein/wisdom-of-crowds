@@ -365,6 +365,7 @@ def test_clear_path_dict():
     c.clear_path_dict()
     assert c.precomputed_path_dict == {}
     assert len(c.precomputed_paths_by_hole_node) == 0
+    assert c.s_cache == {}
     assert c.refresh_requested == True
     c.is_mk_observer('b',2,2) # this should NOT trigger an error
     assert c.refresh_requested == False
@@ -378,6 +379,7 @@ def test_clear_path_dict():
     c.clear_path_dict()
     assert c.precomputed_path_dict == {}
     assert len(c.precomputed_paths_by_hole_node) == 0
+    assert c.s_cache == {}
     assert c.refresh_requested == True
     c.is_mk_observer('b',2,2) # this should NOT trigger an error
     assert c.refresh_requested == False
