@@ -1,5 +1,12 @@
 # wisdom-of-crowds
 
+![coverage](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/.reports/coverage-badge.svg)
+![tests](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/.reports/tests-badge.svg)
+![shields.io-issues](https://img.shields.io/github/issues/cvklein/wisdom-of-crowds)
+![shields.io-forks](https://img.shields.io/github/forks/cvklein/wisdom-of-crowds)
+![shields.io-stars](https://img.shields.io/github/stars/cvklein/wisdom-of-crowds)
+![shields.io-license](https://img.shields.io/github/license/cvklein/wisdom-of-crowds)
+
 ### The package
 
 This package provides a replication and extension of the measures described in Sullivan et al. (2020) Vulnerability in Social Epistemic Networks *International Journal of Philosophical Studies*  https://doi.org/10.1080/09672559.2020.1782562
@@ -36,6 +43,7 @@ Determining whether a node is an m,k-observer involves solving combinatorially m
 To that end, there are several speedups implemented. Behind the scenes ``Crowd`` does a lot of caching of seen paths. The means that lookups for single nodes may seem slow, but iterating over all nodes ofen speeds up over time. It also means that pickling a ``Crowd()`` can result in surprisingly large files, though on the plus side it means that re-computing values is often trivial.  The clique-finding problem is optimized to terminate early if possible, but verifying that a node is *not* an m,k-observer can be time consuming on nodes with a large number of sources.
 
 On the plus side, the optimizations mean that calcluating measures for an entire graph can be very fast. It is possible to compute (e.g.) measures for every node in a realistic social graph (tens of thousands of nodes,  hundreds of thousands of edges) a few hours on desktop machines.
+
 
 ### License and Citation
 
