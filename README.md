@@ -1,5 +1,12 @@
 # wisdom-of-crowds
 
+![coverage](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/.reports/coverage-badge.svg)
+![tests](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/.reports/tests-badge.svg)
+![shields.io-issues](https://img.shields.io/github/issues/cvklein/wisdom-of-crowds)
+![shields.io-forks](https://img.shields.io/github/forks/cvklein/wisdom-of-crowds)
+![shields.io-stars](https://img.shields.io/github/stars/cvklein/wisdom-of-crowds)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 ### The package
 
 This package provides a replication and extension of the measures described in Sullivan et al. (2020) Vulnerability in Social Epistemic Networks *International Journal of Philosophical Studies*  https://doi.org/10.1080/09672559.2020.1782562
@@ -37,7 +44,9 @@ To that end, there are several speedups implemented. Behind the scenes ``Crowd``
 
 On the plus side, the optimizations mean that calcluating measures for an entire graph can be very fast. It is possible to compute (e.g.) measures for every node in a realistic social graph (tens of thousands of nodes,  hundreds of thousands of edges) a few hours on desktop machines.
 
+
 ### License and Citation
+[![cc-by-nc-sa](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 This software is released under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International: CC BY-NC-SA 4.0 license. Full license terms are detailed at https://creativecommons.org/licenses/by-nc-sa/4.0/
 
