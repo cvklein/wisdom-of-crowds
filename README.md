@@ -34,7 +34,11 @@ pi_n = c.pi('e')        # returns the pi-value of node 'n'; pi = S * D
 h_n = c.h_measure('n')  # returns the h-measure of node 'n'; the highest h for which mk_observer('n', h, h) is True
 ```
 
+### Example with visualization
 Refer to [``example notebook.ipynb``](https://github.com/cvklein/wisdom-of-crowds/blob/main/example%20notebook.ipynb) for a more detailed ready-to-use example with visualization.
+
+### Documentation
+The documentation is available [here](https://github.com/cvklein/wisdom-of-crowds/blob/main/docs/wisdom_of_crowds.py.md), generated using the amazing ``lazydocs`` tool.
 
 ### Implementation notes
 
