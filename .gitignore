@@ -5,3 +5,5 @@ bugfixing.ipynb
 .ipynb_checkpoints/bugfixing-checkpoint.ipynb
 __pycache__/wisdom_of_crowds.cpython-39.pyc
 __pycache__/test_wisdom_of_crowds.cpython-39-pytest-6.2.5.pyc
+.reports/coverage.*
+.reports/junit.*
