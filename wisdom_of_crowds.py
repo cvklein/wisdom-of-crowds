@@ -65,8 +65,10 @@ class Crowd:
         __efficient_pairs: internal function, makes search for possible cliques more efficient.
         
         This should not be called directly by the user.
+        
         Args:
             x: input list
+            
         Returns:
           unique pairs of elements (x_i, x_j)
         """
@@ -139,6 +141,7 @@ class Crowd:
         """
         shortest_path_length_node_source_target: wrapper function to get the length of the
             shortest path between vertices source and target, without vertex v.
+            
             no path = infinite length
             
         Args:
@@ -159,8 +162,8 @@ class Crowd:
 
     def is_mk_observer(self, v, m, k):
         """
-        is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020)
-            optimized clique-finding algo by CVK
+        is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020);
+            optimized clique-finding algo by CVK.
         
         Args:
             v: vertex to evaluate
@@ -261,6 +264,7 @@ class Crowd:
     def S(self, v):
         """
         S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v. 
+        
             S = max_{(m,k) in MK}(m * k)
             
         Args:
@@ -298,6 +302,7 @@ class Crowd:
         """
         D: calculates D, defined in the literature as the number of topics found for
             informants of vertex v per (Sullivan et al., 2020)
+            
             We apply the general case D = D' = | union_{(u,v) in E} C'(u) |
             
         Args:
@@ -372,8 +377,10 @@ def make_sullivanplot(pis, ds, ses, colormap='gist_yarg', suptitle=None, cax=Non
     make_sullivanplot: This makes the style of plot from Sullivan et al (2020).
     
     cvk note: Could be more generic, but essentially has two modes:
+        
     * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.
       This will make and render a plot
+      
     * Two, or else you can pass an axis (and optionally colormap and suptitle)
       and this will render it on the axis, allowing for multiple plots (as done in the paper figures).
 

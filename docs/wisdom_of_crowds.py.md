@@ -10,7 +10,7 @@
 
 ---
 
-<a href="../wisdom_of_crowds.py#L370"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L375"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `make_sullivanplot`
 
@@ -28,7 +28,11 @@ make_sullivanplot(
 
 make_sullivanplot: This makes the style of plot from Sullivan et al (2020). 
 
-cvk note: Could be more generic, but essentially has two modes: * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.  This will make and render a plot * Two, or else you can pass an axis (and optionally colormap and suptitle)  and this will render it on the axis, allowing for multiple plots (as done in the paper figures). 
+cvk note: Could be more generic, but essentially has two modes:  
+
+* One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.  This will make and render a plot  
+
+* Two, or else you can pass an axis (and optionally colormap and suptitle)  and this will render it on the axis, allowing for multiple plots (as done in the paper figures). 
 
 
 
@@ -53,7 +57,7 @@ Precondition:
 
 ---
 
-<a href="../wisdom_of_crowds.py#L483"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L490"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `iteratively_prune_graph`
 
@@ -135,7 +139,7 @@ Constructor:  `__init__`: Inits the Crowd object.
 
 ---
 
-<a href="../wisdom_of_crowds.py#L297"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L301"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `D`
 
@@ -143,7 +147,9 @@ Constructor:  `__init__`: Inits the Crowd object.
 D(v)
 ```
 
-D: calculates D, defined in the literature as the number of topics found for  informants of vertex v per (Sullivan et al., 2020)  We apply the general case D = D' = | union_{(u,v) in E} C'(u) |  
+D: calculates D, defined in the literature as the number of topics found for  informants of vertex v per (Sullivan et al., 2020)  
+
+ We apply the general case D = D' = | union_{(u,v) in E} C'(u) |  
 
 
 
@@ -158,7 +164,7 @@ D: calculates D, defined in the literature as the number of topics found for  in
 
 ---
 
-<a href="../wisdom_of_crowds.py#L261"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L264"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `S`
 
@@ -166,7 +172,9 @@ D: calculates D, defined in the literature as the number of topics found for  in
 S(v)
 ```
 
-S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v.   S = max_{(m,k) in MK}(m * k)  
+S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v.  
+
+ S = max_{(m,k) in MK}(m * k)  
 
 
 
@@ -181,7 +189,7 @@ S: calculates S, defined in (Sullivan et al., 2020) as the structural position o
 
 ---
 
-<a href="../wisdom_of_crowds.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `clear_path_dict`
 
@@ -193,7 +201,7 @@ clear_path_dict: helper function to completely reset the precomputed path dictio
 
 ---
 
-<a href="../wisdom_of_crowds.py#L335"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L340"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `h_measure`
 
@@ -217,7 +225,7 @@ h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is 
 
 ---
 
-<a href="../wisdom_of_crowds.py#L160"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L163"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `is_mk_observer`
 
@@ -225,7 +233,7 @@ h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is 
 is_mk_observer(v, m, k)
 ```
 
-is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020)  optimized clique-finding algo by CVK 
+is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020);  optimized clique-finding algo by CVK. 
 
 
 
@@ -242,7 +250,7 @@ is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sulli
 
 ---
 
-<a href="../wisdom_of_crowds.py#L322"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L327"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `pi`
 
@@ -265,7 +273,7 @@ pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the pro
 
 ---
 
-<a href="../wisdom_of_crowds.py#L138"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../wisdom_of_crowds.py#L140"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `shortest_path_length_node_source_target`
 
@@ -273,7 +281,9 @@ pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the pro
 shortest_path_length_node_source_target(v, source, target)
 ```
 
-shortest_path_length_node_source_target: wrapper function to get the length of the  shortest path between vertices source and target, without vertex v.  no path = infinite length  
+shortest_path_length_node_source_target: wrapper function to get the length of the  shortest path between vertices source and target, without vertex v.  
+
+ no path = infinite length  
 
 
 
