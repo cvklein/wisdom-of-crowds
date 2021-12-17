@@ -59,3 +59,8 @@ If you use this package, please cite us! (Watch this space)
 ### Version history
 
 v1.0  17 Dec 2021  -- released to public
+
+
+#### Technologies and components used
+* Libraries: ``networkx``, ``matplotlib``, ``pytest``, ``coverage``
+* Documentation/badging: ``lazydocs``, ``genbadge``, *shields.io*
