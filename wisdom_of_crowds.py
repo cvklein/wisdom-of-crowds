@@ -12,13 +12,34 @@ class Crowd:
     """
     Class for encapsulating a graph and pre-computed (memoized) features for the
     Wisdom of Crowds algorithm, per Sullivan et al. (2020),
+    
     "Vulnerability in Social Epistemic Networks" *International Journal of Philosophical Studies*
     https://doi.org/10.1080/09672559.2020.1782562
-    :param G: a networkx graph, typically DiGraph.
-    :param max_m: maximum m to consider in the calculations
-    :param node_key: attribute to consider for each node, when considering topic diversity (defaults to 'T')
+    
+    Attributes:
+        G: networkx graph (see __init__)
+        min_k: smallest k to consider during processing, defaults to 2
+        max_k: largest k to consider during processing, defaults to 5
+        min_m: smallest m to consider during processing, defaults to 1
+        max_m: largest m to consider during processing
+        node_key: attribute to consider for each node (see __init__)        
+        precomputed_path_dict: cache for unconditional paths
+        precomputed_paths_by_hole_node: cache for dict of paths per node
+        refresh_requested: flag indicating if cache has expired
+        node_set: a snapshot of nodes to detect cache expiry
+        edge_set: a snapshot of nodes to detect cache expiry
+        s_cache: cached versions of S results
     """
     def __init__(self, G, max_m=5, node_key='T'):
+        """
+        Constructor:
+            `__init__`: Inits the Crowd object.
+        
+        Args:
+            G: a networkx graph, typically DiGraph.
+            max_m: maximum m to consider in the calculations
+            node_key: attribute to consider for each node, when considering topic diversity (defaults to 'T')
+        """
         # object check to avoid null ptr reference
         if G is None:
             raise ValueError('Crowd: init requires a valid networkx graph!')
@@ -42,9 +63,12 @@ class Crowd:
     def __efficient_pairs(self, x):
         """
         __efficient_pairs: internal function, makes search for possible cliques more efficient.
-            This should not be called directly by the user.
-        :param x: input list
-        :returns: unique pairs of elements (x_i, x_j)
+        
+        This should not be called directly by the user.
+        Args:
+            x: input list
+        Returns:
+          unique pairs of elements (x_i, x_j)
         """
         l = len(x)
         for i in range(1, l):
@@ -56,15 +80,20 @@ class Crowd:
         """
         __shortest_path_node_source_target: internal function,
             to get the length of the shortest path between vertices source and target, excluding v.
-            The results need to be postprocessed by wrapper function
-            shortest_path_length_node_source_target and not called directly.
-            This function does memoization for efficient future processing:
-            for a single node, and a single source, precompute the path,
-            and populate the current dictionary precomputed_path_dict with them.
-        :param v: vertex under exclusion
-        :param source: source node
-        :param target: target node
-        :returns: integer z, in range 0 <= z < +infinity (unadjusted)
+            
+        The results need to be postprocessed by wrapper function
+        shortest_path_length_node_source_target and not called directly.
+        This function does memoization for efficient future processing:
+        for a single node, and a single source, precompute the path,
+        and populate the current dictionary precomputed_path_dict with them.
+        
+        Args:
+            v: vertex under exclusion
+            source: source node
+            target: target node
+        
+        Returns:
+            integer z, in range 0 <= z < +infinity (unadjusted)
         """
         # error checking: 'v' needs to exist.
         # (missing 'source' and 'target' raised by nx)
@@ -111,10 +140,14 @@ class Crowd:
         shortest_path_length_node_source_target: wrapper function to get the length of the
             shortest path between vertices source and target, without vertex v.
             no path = infinite length
-        :param v: vertex under consideration, as defined by (Sullivan et al., 2020)
-        :param source: source node
-        :param target: target node
-        :returns: integer z, in range 0 <= z <= +infinity
+            
+        Args:
+            v: vertex under consideration, as defined by (Sullivan et al., 2020)
+            source: source node
+            target: target node
+        
+        Returns: 
+            integer z, in range 0 <= z <= +infinity
         """
         z = len(self.__shortest_path_node_source_target(v, source, target))
         if z == 0:
@@ -128,10 +161,14 @@ class Crowd:
         """
         is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020)
             optimized clique-finding algo by CVK
-        :param v: vertex to evaluate
-        :param m: m as defined in (Sullivan et al., 2020); m >= 1
-        :param k: k as defined in (Sullivan et al., 2020); k > 1
-        :returns: boolean
+        
+        Args:
+            v: vertex to evaluate
+            m: m as defined in (Sullivan et al., 2020); m >= 1
+            k: k as defined in (Sullivan et al., 2020); k > 1
+        
+        Returns:
+            a boolean indicating the m,k-observer status of v
         """
         if m < 1 or k <= 1:
             raise ValueError('Crowd: m needs to be integer >= 1; k needs to be integer > 1.')
@@ -223,10 +260,14 @@ class Crowd:
 
     def S(self, v):
         """
-        S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v
+        S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v. 
             S = max_{(m,k) in MK}(m * k)
-        :param v: vertex to evaluate
-        :returns: integer S, in range 0 <= (class constant max_m * class constant max_k)
+            
+        Args:
+            v: vertex to evaluate
+            
+        Returns:
+            integer S, in range 0 <= (class constant max_m * class constant max_k)
         """
 
         try:
@@ -258,8 +299,12 @@ class Crowd:
         D: calculates D, defined in the literature as the number of topics found for
             informants of vertex v per (Sullivan et al., 2020)
             We apply the general case D = D' = | union_{(u,v) in E} C'(u) |
-        :param v: vertex to evaluate
-        :returns: integer D, in range 0 <= D
+            
+        Args:
+            v: vertex to evaluate
+        
+        Returns:
+            integer D, in range 0 <= D
         """
         topics = set()
         source_nodes = self.G.predecessors(v)
@@ -277,8 +322,12 @@ class Crowd:
     def pi(self, v):
         """
         pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the product of S and D
-        :param v: vertex to evaluate
-        :returns: integer pi, where pi = S * D
+        
+        Args:
+            v: vertex to evaluate
+            
+        Returns:
+            integer pi, where pi = S * D
         """
         return self.D(v) * self.S(v)
 
@@ -286,9 +335,13 @@ class Crowd:
     def h_measure(self, v, max_h=6):
         """
         h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is true
-        :param v: vertex to evaluate
-        :param max_h: maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
-        :returns: integer h, in range 1 < h <= max_h
+        
+        Args:
+            v: vertex to evaluate
+            max_h: maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
+        
+        Returns:
+            integer h, in range 1 < h <= max_h
         """
         for h in range(max_h, 1, -1): # recall (k > 1)
             if self.is_mk_observer(v, h, h):
@@ -316,22 +369,28 @@ These can be called by importing them
 
 def make_sullivanplot(pis, ds, ses, colormap='gist_yarg', suptitle=None, cax=None, yscale='linear'):
     """
-    make_sullivanplot: This makes the style of plot from Sullivan et al (2020)
+    make_sullivanplot: This makes the style of plot from Sullivan et al (2020).
+    
     cvk note: Could be more generic, but essentially has two modes:
     * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.
       This will make and render a plot
     * Two, or else you can pass an axis (and optionally colormap and suptitle)
       and this will render it on the axis, allowing for multiple plots (as done in the paper figures).
 
-    :param pis: a list of pi-s
-    :param ds:  a list of D-s
-    :param ses: a list of S-s
-    :precondition: PRECONDITION: len(pis) == len(Ds) == len(Ses) == X, where len(X) > 0
-    :param colormap: (optional) name of a colormap, defaults to 'gist_yarg'
-    :param suptitle: (optional) supplementary title
-    :param cax:  (optional) axis to render on
-    :param yscale: (optional) scale of y-axis. Defaults to linear.
-    :returns: None on success; but generates the plot in a plt window.
+    Args:
+        pis: a list of pi-s
+        ds:  a list of D-s
+        ses: a list of S-s
+        colormap: (optional) name of a colormap, defaults to 'gist_yarg'
+        suptitle: (optional) supplementary title
+        cax:  (optional) axis to render on
+        yscale: (optional) scale of y-axis. Defaults to linear.
+    
+    Precondition:
+        PRECONDITION: len(pis) == len(Ds) == len(Ses) == X, where len(X) > 0
+
+    Returns:
+        None on success; but generates the plot in a plt window.
     """
     assert(len(pis) == len(ds) == len(ses))
     assert(len(pis) > 0)
@@ -423,18 +482,22 @@ def make_sullivanplot(pis, ds, ses, colormap='gist_yarg', suptitle=None, cax=Non
 
 def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='weight', verbose=False):
     """
-    iteratively_prune_graph
-    Iterative graph pruner, provided as a helper function.
-    With no arguments, it iteratively prunes as per Sullivan et al 2020
+    iteratively_prune_graph: Iterative graph pruner, provided as a helper function.
+    
+    With no arguments, it iteratively prunes as per Sullivan et al (2020).
     i.e. culls all nodes with indegree + outdegree <= 1, takes the largest connected component, and iterates until stable.
     It also adds the possibility of a weight threshold, which is useful for bigger/denser graphs.
     cvk note: I ended up making a copy b/c in-place destructive changes are easier than playing with subgraphs
 
-    :param H: source graph - will not be modified. [NB: this is nx.Graph; NOT Crowd. An assertion will test for this.]
-    :param threshold: (optional) threshold T where indegree+outdegree <= T
-    :param weight_threshold: (optional) allows specification of weights-per-edge. This throws an exception if edges are not weighted
-    :param weight_key: (optional) identifies key used for weight thresholding. Ignored if weight_threshold is not specified.
-    :param verbose: (optional) debugging flag for verbose reporting
+    Args:
+        H: source graph - will not be modified. [NB: this is nx.Graph; NOT Crowd. An assertion will test for this.]
+        threshold: (optional) threshold T where indegree+outdegree <= T
+        weight_threshold: (optional) allows specification of weights-per-edge. This throws an exception if edges are not weighted
+        weight_key: (optional) identifies key used for weight thresholding. Ignored if weight_threshold is not specified.
+        verbose: (optional) debugging flag for verbose reporting
+        
+    Returns:
+        G: pruned graph, which is a full (deep) copy of H then pruned.
     """
     if not isinstance(H, nx.Graph):
         raise TypeError('The helper function iteratively_prune_graph expects a Graph, not Crowd.')
