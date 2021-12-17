@@ -5,7 +5,7 @@
 ![shields.io-issues](https://img.shields.io/github/issues/cvklein/wisdom-of-crowds)
 ![shields.io-forks](https://img.shields.io/github/forks/cvklein/wisdom-of-crowds)
 ![shields.io-stars](https://img.shields.io/github/stars/cvklein/wisdom-of-crowds)
-![shields.io-license](https://img.shields.io/github/license/cvklein/wisdom-of-crowds)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 ### The package
 
@@ -46,6 +46,7 @@ On the plus side, the optimizations mean that calcluating measures for an entire
 
 
 ### License and Citation
+[![cc-by-nc-sa](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 This software is released under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International: CC BY-NC-SA 4.0 license. Full license terms are detailed at https://creativecommons.org/licenses/by-nc-sa/4.0/
 
