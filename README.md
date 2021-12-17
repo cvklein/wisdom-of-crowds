@@ -15,6 +15,17 @@ There is also a function ``D(node)`` that returns the *diversity* of a node, def
 
 As per Sullivan et al, ``S`` is not calculated for k<2, so a node with zero or one inputs has S=0.
 
+### Quick start guide
+For example, given a ``networkx`` graph ``G``, we can easily use the package as follows:
+```python
+c = Crowd(G)            # defaults
+check_n = c.is_mk_observer('n',3,3) # checks if node 'n' in G is a 3,3-observer
+S_n = c.S('n')          # returns the S-value of node 'n'
+D_n = c.D('n')          # returns the D-value (Diversity) of node 'n'
+pi_n = c.pi('e')        # returns the $\pi$-value of node 'n'
+h_n = c.h_measure('n')  # returns the h-measure of node 'n' 
+```
+
 ### Implementation notes
 
 Determining whether a node is an m,k-observer involves solving combinatorially many multiple shortest path problems along with a minimal independent set problem. Both are computationally demanding. Our goal was to be able to run the above algorithms on large graphs in a reasonable time.
