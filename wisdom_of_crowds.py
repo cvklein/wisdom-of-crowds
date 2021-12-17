@@ -36,6 +36,8 @@ class Crowd:
         # NB: weisfeiler_lehman_graph_hash(G) is the best, but is very performance-draining
         self.node_set = set(G.nodes())
         self.edge_set = set(G.edges())
+        #cache S values too. This speeds up pi, and recalcs. cleared if you clear path dict.
+        self.s_cache = {}
 
     def __efficient_pairs(self, x):
         """
@@ -226,6 +228,14 @@ class Crowd:
         :param v: vertex to evaluate
         :returns: integer S, in range 0 <= (class constant max_m * class constant max_k)
         """
+
+        try:
+            s  = self.s_cache[v]
+            return s 
+        except KeyError:
+            pass
+
+
         possibilities = sorted([(m*k, m, k) for m, k in \
             itertools.product(range(self.min_m, self.max_m+1), \
                               range(self.min_k, self.max_k+1))], \
@@ -234,9 +244,12 @@ class Crowd:
         for mk, m, k in possibilities:
             mk_observer = self.is_mk_observer(v, m, k)
             if mk_observer:
+                self.s_cache[v] = mk
                 return mk
             else:
                 pass
+
+        self.s_cache[v] = 0
         return 0
 
 
@@ -289,6 +302,7 @@ class Crowd:
         """
         self.precomputed_path_dict = {}
         self.precomputed_paths_by_hole_node = defaultdict(dict)
+        self.s_cache = {}
         self.refresh_requested = True
         return
 
