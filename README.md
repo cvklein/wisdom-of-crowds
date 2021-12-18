@@ -23,14 +23,14 @@ There is also a function ``D(node)`` that returns the *diversity* of a node, def
 As per Sullivan et al, ``S`` is not calculated for k<2, so a node with zero or one inputs has S=0.
 
 ### Quick start guide
-For example, given a ``networkx`` graph ``G``, we can easily use the package as follows:
+For example, given a ``networkx`` graph, say a digraph ``G`` of a social network, we can easily use the package as follows:
 ```python
 c = Crowd(G)            # defaults
 
 check_n = c.is_mk_observer('n',3,3) # checks if node 'n' in G is a 3,3-observer
 S_n = c.S('n')          # returns the S-value of node 'n'; S = max_{(m,k) in MK}(m * k)
 D_n = c.D('n')          # returns the D-value (Diversity) of node 'n'
-pi_n = c.pi('e')        # returns the pi-value of node 'n'; pi = S * D
+pi_n = c.pi('n')        # returns the pi-value of node 'n'; pi = S * D
 h_n = c.h_measure('n')  # returns the h-measure of node 'n'; the highest h for which mk_observer('n', h, h) is True
 ```
 
