@@ -63,9 +63,7 @@ Determining whether a node is an $m,k$-observer is combines multiple shortest-pa
 
 The remainder of the package are convenience functions for calculating and displaying various parameters defined by Sullivan et al.
 
-Figure \autoref{fig:twitter} gives an example plot for a a real-life network of participants who retweeted content around the Black Lives Matter movement in the first half of 2020. Sullivan et al. used an earlier version of this dataset and were able to examine a network of 185 nodes. This analysis was run on a culled network of ~16k nodes and ~145k edges. Batch processing took about 6.25 hours on a 2017 desktop iMac.
-
-![Profile plots for entire network and subgroups looking at clusters (left) and topics (right). X axis is proportion of total, Y axis shows both S (height of bars) and $\pi$ (black line), plotted on a log scale.\label{fig:twitter}](twitterfigure.png)
+ \autoref{fig:twitter} gives an example plot for a a real-life network of participants who retweeted content around the Black Lives Matter movement in the first half of 2020. Sullivan et al. used an earlier version of this dataset and were able to examine a network of 185 nodes. This analysis was run on a culled network of ~16k nodes and ~145k edges. Batch processing took about 6.25 hours on a 2017 desktop iMac.
 
 
 #Discussion
@@ -78,6 +76,7 @@ Moving beyond that, it would be interesting to study networks with more than one
 
 The exploratory profiling made possible by our tool reveals patterns of epistemic isolation and interaction across real-world networks, and suggests possibilities for more specific analyses.  By providing it to the community at large, we hope to facilitate further modelling of epistemic networks across a variety of domains.
 
+![Profile plots for entire network and subgroups looking at clusters (left) and topics (right). X axis is proportion of total, Y axis shows both S (height of bars) and $\pi$ (black line), plotted on a log scale.\label{fig:twitter}](twitterfigure.png)
 
 
 # Acknowledgements
