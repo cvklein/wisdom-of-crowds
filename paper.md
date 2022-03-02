@@ -66,7 +66,7 @@ The remainder of the package are convenience functions for calculating and displ
  \autoref{fig:twitter} gives an example plot for a a real-life network of participants who retweeted content around the Black Lives Matter movement in the first half of 2020. Sullivan et al. used an earlier version of this dataset and were able to examine a network of 185 nodes. This analysis was run on a culled network of ~16k nodes and ~145k edges. Batch processing took about 6.25 hours on a 2017 desktop iMac.
 
 
-#Discussion
+# Discussion
 
 Our results show that it is possible to replicate the methodology used by Sullivan et al. in larger networks, and that insights about the relative epistemic positions of different communities within a network can be drawn from plotting these parameters. As our package and its dependencies are all open source, this makes it possible for researchers in a range of fields (including philosophy, psychology, sociology, anthropology, communications,  and network science) both to conduct new research and to re-analyze networks that they have previously studied.
 
