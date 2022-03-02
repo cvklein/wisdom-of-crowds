@@ -68,6 +68,16 @@ Figure \autoref{fig:twitter} gives an example plot for a a real-life network of 
 ![Profile plots for entire network and subgroups looking at clusters (left) and topics (right). X axis is proportion of total, Y axis shows both S (height of bars) and $\pi$ (black line), plotted on a log scale.\label{fig:twitter}](twitterfigure.png)
 
 
+#Discussion
+
+Our results show that it is possible to replicate the methodology used by Sullivan et al. in larger networks, and that insights about the relative epistemic positions of different communities within a network can be drawn from plotting these parameters. As our package and its dependencies are all open source, this makes it possible for researchers in a range of fields (including philosophy, psychology, sociology, anthropology, communications,  and network science) both to conduct new research and to re-analyze networks that they have previously studied.
+
+So far, the only networks that have been studied using this tool are from Twitter (and, as part of our testing framework, *de rigueur* standard social networks such as the Florentine Families network of marriages [@breiger1986cumulated]. We anticipate that future research will expand the types of social networks under study. Other sources from social media such as Facebook, Reddit, and YouTube all seem to be viable candidates for study.  Considering offline epistemic networks would be especially valuable, as their structure may be interestingly different from the structures found online; as well as epistemic network simulations, created with tools such as Laputa. We expect that studies of friend networks, organizational networks in industry and the military, networks of sources used by journalists, criminal cartel networks, and academic citation networks would prove valuable.
+
+Moving beyond that, it would be interesting to study networks with more than one type of testimonial edge (e.g., public communications versus private ones). One intriguing hypothesis is that these may differ in structure even if they contain the same nodes, and that individuals who are central in public networks but peripheral in private networks (or vice versa) would tend to play unique roles in the social epistemology of those networks.
+
+The exploratory profiling made possible by our tool reveals patterns of epistemic isolation and interaction across real-world networks, and suggests possibilities for more specific analyses.  By providing it to the community at large, we hope to facilitate further modelling of epistemic networks across a variety of domains.
+
 
 
 # Acknowledgements
