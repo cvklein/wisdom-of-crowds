@@ -51,19 +51,13 @@ On the plus side, the optimizations mean that calcluating measures for an entire
 
 ### License and Citation
 
-License Copyright: Copyright © 2007 Free Software Foundation, Inc.
-License License: "Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed." (www.gnu.org/licenses/gpl-3.0.en.html).
-License Contact: Free Software Foundation (fsf.org).
-
-[![GPL-3.0-Only](https://opensource.org/licenses/GPL-3.0](https://opensource.org/licenses/GPL-3.0)
-
 This software is released under the GNU General Public License version 3 (GPL3.0) (https://opensource.org/licenses/GPL-3.0](https://opensource.org/licenses/GPL-3.0)
 
 If you use this package, please cite us! (Watch this space)
 
 ### Version history
 
-v1.01 2 Mar 2022 -- License update 
+v1.01 2 Mar 2022 -- License update
 v1.0  17 Dec 2021  -- released to public
 
 
