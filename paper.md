@@ -7,7 +7,7 @@ tags:
   - network epistemology
   - social epistemology
 authors:
-  - name: Colin Klein^[co-first author]^[corresponding author] # note this makes a footnote saying 'co-first author'
+  - name: Colin Klein^[co-first author] ^[corresponding author] # note this makes a footnote saying 'co-first author'
     orcid: 0000-0002-7406-4010
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Marc Cheong^[co-first author] # note this makes a footnote saying 'co-first author'
