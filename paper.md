@@ -5,9 +5,9 @@ tags:
   - epistemic networks
   - social epistemology
   - network epistemology
-  - social epistemology
+  - testimony
 authors:
-  - name: Colin Klein^[co-first author]^[corresponding author] # note this makes a footnote saying 'co-first author'
+  - name: Colin Klein^[co-first author] ^[corresponding author] # note this makes a footnote saying 'co-first author'
     orcid: 0000-0002-7406-4010
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Marc Cheong^[co-first author] # note this makes a footnote saying 'co-first author'
@@ -29,7 +29,7 @@ affiliations:
  - name: Macquarie University
    index: 3
  - name: Eindhoven University
-  index: 4
+   index: 4
 date: 2 Mar 2022
 bibliography: paper.bib
 
@@ -37,77 +37,50 @@ bibliography: paper.bib
 
 # Summary
 
-The epistemic position of an agent often depends on their position in a larger network of other agents who provide them with information. In general, agents are better off if they have diverse and independent sources. [@SullivanVulnerability20] developed a method for quantitatively characterizing the epistemic position of individuals in a network that takes into account both diversity and independence. Sullivan et al.'s work presented a proof-of-concept, closed-source implementation on a small graph derived from Twitter data. We present an ground up, open-source re-implementation of their concepts in Python, optimized to be usable on much larger networks.
+Most of what we know we know because we learned about it from other people. \emph{Social epistemology} is the subfield of philosophy that studies how knowledge and justification depend on the testimony of others [@goldman1999knowledge]. In recent years, social epistemologists have moved away from considering dyadic relationships between individuals to consider the ways in which social epistemic \emph{networks} shape the information we receive [@o2019misinformation; @alfano2020humility]. A focus on networks has been influential because it allows philosophers to connect their concerns to the substantial body of empirical and simulation work on real-world networks and their graph-theoretic properties.
+
+ Broadly speaking, individuals are in a better epistemic position if they are receiving information from diverse and independent sources, with the more diversity and independence the better.  Sullivan et al. quantified this relationship by introducing the idea of an $m,k$-observer. Given a graph $G$, say that a node $n$ is an $m,k$-observer just in case it receives information from a set of at least $k$ different nodes which are pairwise at least $m$ steps away from one another, when considered on the subgraph of $G$ that does not contain $n$. If $G$ is directed, then candidate sources must be at least $m$ steps away in both directions. They then define the measure  $S(n)$ is just the largest $mk$ such that $n$ is an $m,k$-observer. The present package provides an efficient implementation of this and related concepts, as well as code to generate graphs comparable with the original paper.
+
+
+
+
+
 
 
 
 # Statement of need
 
-`wisdom_of_crowds`
+[@SullivanVulnerability20] showed the utility of epistemically profiling networks. However, they relied on a proof-of-concept, closed-source implementation on a small graph. `wisdom_of_crowds` was developed as a ground-up, open-source reimplementation in Python, optimized to be usable on much larger networks.
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+The field of computational philosophy [@sep-computational-philosophy] is in its infancy, and still lacks accessible tools. The primary tools used have been the closed-source program Laputa [@olsson2011simulation] and scripts written for the agent-based modelling program NetLogo. The development of `wisdom_of_crowds` is not only valuable in its own right, but is meant as a push towards replicability and accessibility by the use of open-source Python tools.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
 
-# Mathematics
+# The `wisdom_of_crowds` package
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+The core of the `wisdom_of_crowds` package is a class `Crowd`. `Crowd` is initialized with a \textit{NetworkX} graph (encapsulating the social network's edges and nodes), and provides various functions to calculate the metrics defined above. Much of the heavy lifting is done by the `Crowd.is_mk_observer(n,m,k)` , which returns `True` just in case node $n$ is an $m,k$-observer.
 
-Double dollars make self-standing equations:
+Determining whether a node is an $m,k$-observer is combines multiple shortest-path problems with a clique-finding problem. On the assumption that most uses will involve looping over many nodes in $G$, the combination of caching shortest paths and greedy clique-finding will minimize the overall computational effort needed [@VassilevskaEfficient09].
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
+The remainder of the package are convenience functions for calculating and displaying various parameters defined by Sullivan et al.
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
+ \autoref{fig:twitter} gives an example plot for a a real-life network of participants who retweeted content around the Black Lives Matter movement in the first half of 2020. Sullivan et al. used an earlier version of this dataset and were able to examine a network of 185 nodes. This analysis was run on a culled network of ~16k nodes and ~145k edges. Batch processing took about 6.25 hours on a 2017 desktop iMac.
 
-# Citations
 
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
+#Discussion
 
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
+Our results show that it is possible to replicate the methodology used by Sullivan et al. in larger networks, and that insights about the relative epistemic positions of different communities within a network can be drawn from plotting these parameters. As our package and its dependencies are all open source, this makes it possible for researchers in a range of fields (including philosophy, psychology, sociology, anthropology, communications,  and network science) both to conduct new research and to re-analyze networks that they have previously studied.
 
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
+So far, the only networks that have been studied using this tool are from Twitter (and, as part of our testing framework, *de rigueur* standard social networks such as the Florentine Families network of marriages [@breiger1986cumulated]. We anticipate that future research will expand the types of social networks under study. Other sources from social media such as Facebook, Reddit, and YouTube all seem to be viable candidates for study.  Considering offline epistemic networks would be especially valuable, as their structure may be interestingly different from the structures found online; as well as epistemic network simulations, created with tools such as Laputa. We expect that studies of friend networks, organizational networks in industry and the military, networks of sources used by journalists, criminal cartel networks, and academic citation networks would prove valuable.
 
-# Figures
+Moving beyond that, it would be interesting to study networks with more than one type of testimonial edge (e.g., public communications versus private ones). One intriguing hypothesis is that these may differ in structure even if they contain the same nodes, and that individuals who are central in public networks but peripheral in private networks (or vice versa) would tend to play unique roles in the social epistemology of those networks.
 
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
+The exploratory profiling made possible by our tool reveals patterns of epistemic isolation and interaction across real-world networks, and suggests possibilities for more specific analyses.  By providing it to the community at large, we hope to facilitate further modelling of epistemic networks across a variety of domains.
 
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
+![Profile plots for entire network and subgroups looking at clusters (left) and topics (right). X axis is proportion of total, Y axis shows both S (height of bars) and $\pi$ (black line), plotted on a log scale.\label{fig:twitter}](twitterfigure.png)
+
 
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+Work on this paper was supported by ARC Grant DP190101507 (to C.K. and M.A.) and by Templeton Grant 61378 (to M.A.)
 
 # References
