@@ -46,7 +46,7 @@ Most of what we know we know because we learned about it from other people. \emp
 
 # Statement of need
 
-[@SullivanVulnerability20] showed the utility of epistemically profiling networks. However, they relied on a proof-of-concept, closed-source implementation run on a small graph. `wisdom_of_crowds` was developed as a ground-up, open-source reimplementation in Python, optimized to be usable on much larger networks.
+[@SullivanVulnerability20]'s award-winning work  showed the utility of epistemically profiling networks. However, they relied on a proof-of-concept, closed-source implementation run on a small graph. `wisdom_of_crowds` was developed as a ground-up, open-source reimplementation in Python, optimized to be usable on much larger networks.
 
 The field of computational philosophy [@sep-computational-philosophy] is in its infancy, and still lacks accessible tools. The primary tools used have been the closed-source program Laputa [@olsson2011simulation] and scripts written for the agent-based modelling Software NetLogo. The development of `wisdom_of_crowds` is not only valuable in its own right, but is meant as a push towards replicability and accessibility by the use of open-source Python tools.
 
@@ -64,13 +64,13 @@ The remainder of the package are convenience functions for calculating and displ
 
 # Discussion
 
-Our results show that it is possible to replicate the methodology used by Sullivan et al. in larger networks, and that insights about the relative epistemic positions of different communities within a network can be drawn from plotting these parameters. As our package and its dependencies are all open source, this makes it possible for researchers in a range of fields (including philosophy, psychology, sociology, anthropology, communications,  and network science) both to conduct new research and to re-analyze networks that they have previously studied.
+Our results show that it is possible to replicate the methodology and outputs of Sullivan et al. in larger networks. As our package and its dependencies are all open source, this makes it possible for researchers in a range of fields (including philosophy, psychology, sociology, anthropology, communications, and network science) both to conduct new research and to re-analyze previously studied networks.
 
-So far, the only networks that have been studied using this tool are from Twitter (and, as part of our testing framework, *de rigueur* standard social networks such as the Florentine Families network of marriages [@breiger1986cumulated]. We anticipate that future research will expand the types of social networks under study. Other sources from social media such as Facebook, Reddit, and YouTube would all be viable candidates for study.  We expect that studies of friend networks, organizational networks in industry and the military, networks of sources used by journalists, criminal cartel networks, and academic citation networks would prove valuable.
+So far, the only networks that have been studied using this tool are from Twitter (and, as part of our testing framework, *de rigueur* standard social networks such as the Florentine Families network  [@breiger1986cumulated]. We anticipate that future research will expand the types of social networks under study. Other sources from social media such as Facebook, Reddit, and YouTube would all be viable candidates for study.  We expect that studies of friend networks, organizational networks in industry and the military, networks of sources used by journalists, criminal cartel networks, and academic citation networks would prove valuable.
 
-The exploratory profiling made possible by our tool reveals patterns of epistemic isolation and interaction across real-world networks, and suggests possibilities for more specific analyses.  By providing it to the community at large, we hope to facilitate further modelling of epistemic networks across a variety of domains.
+The exploratory profiling made possible by our tool can reveal patterns of epistemic isolation and interaction across real-world networks, and suggests possibilities for more specific analyses.  By providing it to the community at large, we hope to facilitate further modelling of epistemic networks across a variety of domains.
 
-![Profile plots for entire network and subgroups looking at clusters (left) and topics (right). X axis is proportion of total, Y axis shows both S (height of bars) and $\pi$ (black line), plotted on a log scale.\label{fig:twitter}](twitterfigure.png)
+![Sample output using built-in functions. Profile plots for entire network and subgroups looking at clusters (left) and topics (right). X axis is proportion of total, Y axis shows both S (height of bars) and $\pi$ (black line), plotted on a log scale.\label{fig:twitter}](twitterfigure.png)
 
 
 # Acknowledgements
