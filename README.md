@@ -51,7 +51,7 @@ On the plus side, the optimizations mean that calcluating measures for an entire
 
 ### License and Citation
 
-This software is released under the GNU General Public License version 3 (GPL3.0) (https://opensource.org/licenses/GPL-3.0](https://opensource.org/licenses/GPL-3.0)
+This software is released under the GNU General Public License version 3 (GPL3.0) [https://opensource.org/licenses/GPL-3.0](https://opensource.org/licenses/GPL-3.0)
 
 If you use this package, please cite us! (Watch this space)
 
