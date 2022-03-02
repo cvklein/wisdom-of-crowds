@@ -17,6 +17,7 @@ authors:
     orcid: 0000-0002-3571-9221
     affiliation: 3
   - name: Emily Sullivan
+    orcid: 0000-0002-2073-5384
     affiliation: 4
   - name: Mark Alfano
     orcid: 0000-0001-5879-8033
