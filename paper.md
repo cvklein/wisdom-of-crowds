@@ -29,7 +29,7 @@ affiliations:
  - name: Macquarie University
    index: 3
  - name: Eindhoven University
-  index: 4
+   index: 4
 date: 2 Mar 2022
 bibliography: paper.bib
 
