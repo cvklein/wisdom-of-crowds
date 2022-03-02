@@ -55,7 +55,6 @@ Most of what we know we know because we learned about it from other people. \emp
 The field of computational philosophy [@sep-computational-philosophy] is in its infancy, and still lacks accessible tools. The primary tools used have been the closed-source program Laputa [@olsson2011simulation] and scripts written for the agent-based modelling program NetLogo. The development of `wisdom_of_crowds` is not only valuable in its own right, but is meant as a push towards replicability and accessibility by the use of open-source Python tools.
 
 
-
 # The `wisdom_of_crowds` package
 
 The core of the `wisdom_of_crowds` package is a class `Crowd`. `Crowd` is initialized with a \textit{NetworkX} graph (encapsulating the social network's edges and nodes), and provides various functions to calculate the metrics defined above. Much of the heavy lifting is done by the `Crowd.is_mk_observer(n,m,k)` , which returns `True` just in case node $n$ is an $m,k$-observer.
@@ -73,6 +72,6 @@ Figure \autoref{fig:twitter} gives an example plot for a a real-life network of 
 
 # Acknowledgements
 
-Work on this paper was supported by ARC Grant DP190101507 (to C.K.\ and M.A.) and by Templeton Grant 61378 (to M.A.)
+Work on this paper was supported by ARC Grant DP190101507 (to C.K. and M.A.) and by Templeton Grant 61378 (to M.A.)
 
 # References
