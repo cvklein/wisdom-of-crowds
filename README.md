@@ -5,7 +5,7 @@
 ![shields.io-issues](https://img.shields.io/github/issues/cvklein/wisdom-of-crowds)
 ![shields.io-forks](https://img.shields.io/github/forks/cvklein/wisdom-of-crowds)
 ![shields.io-stars](https://img.shields.io/github/stars/cvklein/wisdom-of-crowds)
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ### The package
 
