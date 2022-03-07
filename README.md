@@ -46,18 +46,19 @@ Determining whether a node is an m,k-observer involves solving combinatorially m
 
 To that end, there are several speedups implemented. Behind the scenes ``Crowd`` does a lot of caching of seen paths. The means that lookups for single nodes may seem slow, but iterating over all nodes ofen speeds up over time. It also means that pickling a ``Crowd()`` can result in surprisingly large files, though on the plus side it means that re-computing values is often trivial.  The clique-finding problem is optimized to terminate early if possible, but verifying that a node is *not* an m,k-observer can be time consuming on nodes with a large number of sources.
 
-On the plus side, the optimizations mean that calcluating measures for an entire graph can be very fast. It is possible to compute (e.g.) measures for every node in a realistic social graph (tens of thousands of nodes,  hundreds of thousands of edges) a few hours on desktop machines.
+On the plus side, the optimizations mean that calcluating measures for an entire graph can be very fast. It is possible to compute (e.g.) measures for every node in a realistic social graph (tens of thousands of nodes,  hundreds of thousands of edges) in a few hours on desktop machines.
 
 
 ### License and Citation
 
 This software is released under the GNU General Public License version 3 (GPL3.0) [https://opensource.org/licenses/GPL-3.0](https://opensource.org/licenses/GPL-3.0)
 
-If you use this package, please cite us! (Watch this space)
+If you use this package, we'd appreciate a citation! (Watch this space for details)
 
 ### Version history
 
 v1.01 2 Mar 2022 -- License update
+
 v1.0  17 Dec 2021  -- released to public
 
 
