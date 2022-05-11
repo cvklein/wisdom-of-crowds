@@ -1,10 +1,9 @@
 
-.ipynb_checkpoints/example notebook-checkpoint.ipynb
-__pycache__/wisdom_of_crowds.cpython-37.pyc
+.ipynb_checkpoints/*
+__pycache__/*
 bugfixing.ipynb
-.ipynb_checkpoints/bugfixing-checkpoint.ipynb
-__pycache__/wisdom_of_crowds.cpython-39.pyc
-__pycache__/test_wisdom_of_crowds.cpython-39-pytest-6.2.5.pyc
-.reports/coverage.*
-.reports/junit.*
+tests/.reports/coverage.*
+tests/.reports/junit.*
+tests/.coverage
+tests/__pycache__
 .DS_Store
