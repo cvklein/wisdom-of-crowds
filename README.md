@@ -22,6 +22,18 @@ There is also a function ``D(node)`` that returns the *diversity* of a node, def
 
 As per Sullivan et al, ``S`` is not calculated for k<2, so a node with zero or one inputs has S=0.
 
+### Installation
+`wisdom_of_crowds` v1.1.1 is live on pypi (pip), so to get started, just install with pip(3), depending on OS
+```bash
+pip install wisdom_of_crowds  
+# assuming the Python install is >=3.7, and not on a Mac environment
+```
+
+```bash
+pip3 install wisdom_of_crowds
+# assuming the Python install is >=3.7 and on a Mac - due to clashes with the default Mac Python 2.x install
+```
+
 ### Quick start guide
 For example, given a ``networkx`` graph, say a digraph ``G`` of a social network, we can easily use the package as follows:
 ```python
@@ -56,6 +68,7 @@ This software is released under the GNU General Public License version 3 (GPL3.0
 If you use this package, we'd appreciate a citation! (Watch this space for details)
 
 ### Version history
+v1.01.1 11 May 2022 -- first version on pypi, successfully tested 
 
 v1.01 2 Mar 2022 -- License update
 
