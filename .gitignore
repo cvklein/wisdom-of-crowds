@@ -5,5 +5,5 @@ bugfixing.ipynb
 tests/.reports/coverage.*
 tests/.reports/junit.*
 tests/.coverage
-tests/__pycache__
+tests/__pycache__/*
 .DS_Store
