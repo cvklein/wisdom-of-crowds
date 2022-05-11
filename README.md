@@ -1,7 +1,7 @@
 # wisdom-of-crowds
 
-![coverage](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/.reports/coverage-badge.svg)
-![tests](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/.reports/tests-badge.svg)
+![coverage](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/tests/.reports/coverage-badge.svg)
+![tests](https://raw.githubusercontent.com/cvklein/wisdom-of-crowds/main/tests/.reports/tests-badge.svg)
 ![shields.io-issues](https://img.shields.io/github/issues/cvklein/wisdom-of-crowds)
 ![shields.io-forks](https://img.shields.io/github/forks/cvklein/wisdom-of-crowds)
 ![shields.io-stars](https://img.shields.io/github/stars/cvklein/wisdom-of-crowds)
