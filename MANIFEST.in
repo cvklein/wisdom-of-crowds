@@ -1,0 +1,10 @@
+prune .github/
+exclude .gitignore
+prune .ipynb_checkpoints/
+prune __pycache__/
+exclude tests/.reports/*.xml
+prune tests/.coverage/
+prune tests/.pytest_cache/
+prune tests/__pycache__/
+prune src/__pycache__/
+exclude .DS_Store
