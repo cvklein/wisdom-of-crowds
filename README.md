@@ -68,6 +68,8 @@ This software is released under the GNU General Public License version 3 (GPL3.0
 If you use this package, we'd appreciate a citation! (Watch this space for details)
 
 ### Version history
+v1.01.2 2 June 2022 -- bugfix on sparse graphs
+
 v1.01.1 11 May 2022 -- first version on pypi, successfully tested 
 
 v1.01 2 Mar 2022 -- License update
