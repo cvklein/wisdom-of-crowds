@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='wisdom_of_crowds',
-    version='1.01.1',
+    version='1.01.2',
     description='Re-implementation and extension of the measures described in Sullivan et al. (2020): Vulnerability in Social Epistemic Networks, International Journal of Philosophical Studies',
     license='GPL3.0',
     author="Colin Klein and Marc Cheong",
