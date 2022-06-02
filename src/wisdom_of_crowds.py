@@ -60,6 +60,7 @@ class Crowd:
         #cache S values too. This speeds up pi, and recalcs. cleared if you clear path dict.
         self.s_cache = {}
 
+
     def __efficient_pairs(self, x):
         """
         __efficient_pairs: internal function, makes search for possible cliques more efficient.
@@ -127,6 +128,11 @@ class Crowd:
             except KeyError:
                 nodes_less_v = self.node_set - set([v])
                 G_sub = self.G.subgraph(nodes_less_v)
+
+                if not (source in G_sub and target in G_sub):
+                    # no path, as it doesn't exist anymore in the culled subgraph
+                    self.precomputed_paths_by_hole_node[v][(source,target)] = []
+                    return []
                 try:
                     shortest_conditional_path = nx.algorithms.shortest_path(G_sub,source,target)
                     # note that subpaths could also be cached as per above

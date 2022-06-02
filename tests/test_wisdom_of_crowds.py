@@ -77,6 +77,12 @@ def test__shortest_path_node_source_target():
         c._Crowd__shortest_path_node_source_target('a','missing','b')
     with pytest.raises(nx.NodeNotFound):
         c._Crowd__shortest_path_node_source_target('a','b','missing')
+    
+    # case: regression found 2 June 2022
+    # in some edge cases, v=T or v=S, which crashes; should return [] as the path (no feasible path)
+    assert c._Crowd__shortest_path_node_source_target('a','a','b') == []
+    assert c._Crowd__shortest_path_node_source_target('a','b','a') == []
+    assert c._Crowd__shortest_path_node_source_target('a','a','a') == []
 
 
 def test_shortest_path_length_node_source_target():
@@ -111,6 +117,12 @@ def test_shortest_path_length_node_source_target():
         c.shortest_path_length_node_source_target('a','missing','b')
     with pytest.raises(nx.NodeNotFound):
         c.shortest_path_length_node_source_target('a','b','missing')
+
+    # case: regression found 2 June 2022
+    # in some edge cases, v=T or v=S, which crashes. should return +inf (no feasible path)
+    assert c.shortest_path_node_source_target('a','a','b') == float('inf')
+    assert c.shortest_path_node_source_target('a','b','a') == float('inf')
+    assert c.shortest_path_node_source_target('a','a','a') == float('inf')
 
 
 def __construct_test_crowd_ab_only():
