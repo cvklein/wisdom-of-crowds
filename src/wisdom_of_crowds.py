@@ -2,11 +2,13 @@ import networkx as nx
 from collections import defaultdict
 import itertools
 from networkx.exception import NetworkXNoPath
-import warnings
+#import warnings
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.colors import Normalize
 from collections import Counter
+import logging
+
 
 class Crowd:
     """
@@ -57,8 +59,11 @@ class Crowd:
         # NB: weisfeiler_lehman_graph_hash(G) is the best, but is very performance-draining
         self.node_set = set(G.nodes())
         self.edge_set = set(G.edges())
-        #cache S values too. This speeds up pi, and recalcs. cleared if you clear path dict.
+        #cache S and St values too. This speeds up pi, and recalcs. cleared if you clear path dict.
         self.s_cache = {}
+        self.t_cache = {}
+
+        logger = logging.getLogger(__name__) #introduce a (default) logger for the class instance
 
 
     def __efficient_pairs(self, x):
@@ -166,15 +171,20 @@ class Crowd:
             return z - 1
 
 
-    def is_mk_observer(self, v, m, k):
+    def is_mk_observer(self, v, m, k, transmit=False):
         """
         is_mk_observer: checks if the vertex v is an (m,k)-observer as defined by (Sullivan et al., 2020);
             optimized clique-finding algo by CVK.
         
+        If transmit=True, runs the algorithm but checks the node's position as a transmitter.
+        This has the same result as running the algorithm on the reverse of the graph, 
+            but is much more efficient due to not having redo the calculations for the reversed graph.
+        
         Args:
-            v: vertex to evaluate
-            m: m as defined in (Sullivan et al., 2020); m >= 1
-            k: k as defined in (Sullivan et al., 2020); k > 1
+            v       : vertex to evaluate
+            m       : m as defined in (Sullivan et al., 2020); m >= 1
+            k       : k as defined in (Sullivan et al., 2020); k > 1
+            transmit: boolean (defaults False)
         
         Returns:
             a boolean indicating the m,k-observer status of v
@@ -187,7 +197,7 @@ class Crowd:
             # and PRECONDITION 2: AND ONLY IF the user fails to call clear_path_dict...
             if not self.refresh_requested:
                 # throw error and hint as to how user can fix this by regenerating all intermediate data
-                warnings.warn('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification, and to handle LookupErrors.')
+                logging.warning('Performance warning: modifying G externally will result in "cache misses"; please refactor your code to avoid external modification, and to handle LookupErrors.')
                 raise LookupError('Crowd: graph G has been modified externally, cached precomputed_path_dict is obsolete and need to be regenerated! Suggest using crowd.clear_path_dict()')
             else:
                 # rehash the nodeset and edgeset so the graph is no longer detected as "changed"
@@ -201,9 +211,13 @@ class Crowd:
                 # disable the error detector for future runs (until the graph is tampered-with, again)
                 self.refresh_requested = False
 
-        if self.G.is_directed():
-            source_nodes = list(self.G.predecessors(v))
+        if self.G.is_directed(): #this code snippet determines which nodes we measure the distance between, i.e. whether we measure v as an observer or transmitter
+            if transmit==True:
+                source_nodes = list(self.G.successors(v))
+            else:
+                source_nodes = list(self.G.predecessors(v))
         else:
+            if transmit==True: logging.warning("Asked to check the position as transmitter for node", v, ", but since the graph is undirected this is redundant")
             source_nodes = list(self.G.neighbors(v))
 
         # if you have fewer than k, then you can't hear from at least k
@@ -267,25 +281,40 @@ class Crowd:
         return max_k_found
 
 
-    def S(self, v):
+    def S(self, v, mk = False, transmit = False):
         """
         S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v. 
+        If transmit == True, instead calculates calculates T, the inverse of S, i.e. the structural position of v as a transmitter.
+        If mk == True, instead returns a tuple (S, m, k).
+        To speed up future calculations, it also caches the result (S, m, k) in the s_cache dictionary.
         
             S = max_{(m,k) in MK}(m * k)
-            
+            T = max_{(m,k) in MK}(m * k), but running is_m_k_observer() with transmit = True
+                    
         Args:
-            v: vertex to evaluate
+            v:          vertex to evaluate
+            transmit:   whether to calculate the position as transmitter
             
         Returns:
-            integer S, in range 0 <= (class constant max_m * class constant max_k)
+            integer S or T, in range 0 <= (class constant max_m * class constant max_k)
+            or tuple (S, m, k)
         """
 
-        try:
-            s  = self.s_cache[v]
-            return s 
+        try: #Attempt to retrieve previous results. If none exist, calculate S or T
+            if transmit:
+                t_c = self.t_cache[v]
+                if mk:
+                    return t_c
+                else:
+                    return t_c[0]
+            else:
+                s_c = self.s_cache[v]
+                if mk:
+                    return s_c
+                else:
+                    return s_c[0]
         except KeyError:
             pass
-
 
         possibilities = sorted([(m*k, m, k) for m, k in \
             itertools.product(range(self.min_m, self.max_m+1), \
@@ -293,16 +322,61 @@ class Crowd:
             reverse=True)
 
         for mk, m, k in possibilities:
-            mk_observer = self.is_mk_observer(v, m, k)
+            mk_observer = self.is_mk_observer(v, m, k, transmit=transmit)
             if mk_observer:
-                self.s_cache[v] = mk
-                return mk
+                if transmit:
+                    self.t_cache[v]= (mk, m, k)
+                else:
+                    self.s_cache[v] = (mk, m, k)
+                if mk:
+                    return (mk, m ,k)
+                else:
+                    return mk
             else:
                 pass
 
-        self.s_cache[v] = 0
-        return 0
+        if transmit:
+            self.t_cache[v]= (0,0,0)
+        else:
+            self.s_cache[v] = (0,0,0)
+        if mk:
+            return (0,0,0)
+        else:
+            return 0
 
+    def D_edge(self, v, depth=None, selection=None):
+        """
+        Calculating D edge-wise by seeing which topics are transmitted by the 
+            informants of vertex v per (Sullivan et al. 2020)
+        :param v            : vertex to evaluate
+        :param depth_limit  : if we want to look past the immediate soures, how far back to look
+        :param selection    : if we want to only look at a selection of sources, these are the ones
+        :returns            : integer D_edge, in range 0 <= total topics attested in graph
+        """
+
+        if selection != None:
+            if v not in selection:
+                selection = set(selection)
+                selection.add(v)
+            Gf = self.G.subgraph(nodes=selection) #the graph as it is used in this function (to allow for only looking at selections of sources)
+        else:
+            Gf = self.G.copy(as_view=True)
+                  
+        topics = s_topic = set()
+
+        if depth != None:
+            for s,t in nx.bfs_predecessors(nx.reverse(Gf), source=v, depth_limit=depth): #breadth-first search across nodes on a reversed graph to go upstream
+                s_topic = self.G.nodes(data=self.node_key, default=None)[s]
+        else:
+            for e in Gf.in_edges(nbunch=v):
+                s_topic = self.G.nodes(data=self.node_key, default=None)[e[0]]
+        
+        if s_topic is not None:
+            if type(s_topic) is not set:
+                topics.add(s_topic)
+            else:
+                topics.update(s_topic)
+        return len(topics)
 
     def D(self, v):
         """
@@ -321,16 +395,15 @@ class Crowd:
         source_nodes = self.G.predecessors(v)
 
         for s in source_nodes:
-            s_topic = self.G.nodes[s][self.node_key]
-            if type(s_topic) == set:
-                topics.update(s_topic)
-            else:
+            s_topic = self.G.nodes(data=self.node_key, default=None)[s]
+            if type(s_topic) is not set:
                 topics.add(s_topic)
-
+            else:
+                topics.update(s_topic)
         return len(topics)
 
 
-    def pi(self, v):
+    def pi(self, v, transmit = False):
         """
         pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the product of S and D
         
@@ -340,10 +413,10 @@ class Crowd:
         Returns:
             integer pi, where pi = S * D
         """
-        return self.D(v) * self.S(v)
 
+        return self.D(v) * self.S(v, transmit=transmit)
 
-    def h_measure(self, v, max_h=6):
+    def h_measure(self, v, max_h=6, transmit = False):
         """
         h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is true
         
@@ -354,10 +427,35 @@ class Crowd:
         Returns:
             integer h, in range 1 < h <= max_h
         """
-        for h in range(max_h, 1, -1): # recall (k > 1)
-            if self.is_mk_observer(v, h, h):
-                return h
-        return 0
+        s,m,k = self.S(v, mk=True, transmit=transmit)
+        return min(m,k)
+        
+        #for h in range(max_h, 1, -1): # recall (k > 1)
+        #    if self.is_mk_observer(v, h, h, transmit):
+        #        return h
+        #
+        # return 0
+    
+    def census(self, nbunch = None, topics = False):
+        
+        if nbunch is not None: #sets the graph as used by this function to either be the whole graph or (if specified) only a selection
+            Gf = self.G.subgraph(nodes=nbunch) #the graph as it is used in this function (to allow for only looking at selections of sources)
+        else:
+            Gf = self.G.copy(as_view=True)
+        
+        output = dict()
+        
+        for n in Gf:
+            output.update({n : dict( S=self.S(n, mk=True), St=self.S(n, mk=True, transmit=True), H=self.h_measure(n), Ht=self.h_measure(n, transmit=True) )})
+        
+        if topics:
+            empty = True
+            node_key = self.node_key
+            for n in Gf:
+                output[n].update({node_key:Gf.nodes(data=self.node_key, default=None)[n]})
+                output[n].update({'D':self.D(n), 'pi':self.pi(n), 'pi_t':self.pi(n, transmit=True)})
+    
+        return output
 
     def clear_path_dict(self):
         """
@@ -384,7 +482,7 @@ def make_sullivanplot(pis, ds, ses, colormap='gist_yarg', suptitle=None, cax=Non
     
     cvk note: Could be more generic, but essentially has two modes:
         
-    * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a suptitle.
+    * One, you can just pass a list of pis, Ds, and Ses, optionally with a colormap and a subtitle.
       This will make and render a plot
       
     * Two, or else you can pass an axis (and optionally colormap and suptitle)
@@ -493,7 +591,7 @@ def make_sullivanplot(pis, ds, ses, colormap='gist_yarg', suptitle=None, cax=Non
         return None
 
 
-def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='weight', verbose=False):
+def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='weight'):
     """
     iteratively_prune_graph: Iterative graph pruner, provided as a helper function.
     
@@ -519,16 +617,14 @@ def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='w
     done = False
     iteration = 0
 
-    if verbose:
-        print(f'[iteratively_prune_graph: threshold={threshold}, weight_threshold={weight_threshold}, verbose.]')
+    logging.debug(f'[iteratively_prune_graph: threshold={threshold}, weight_threshold={weight_threshold}, verbose.]')
 
     while not done:
         iteration += 1
         done = True
-        if verbose:
-            print(f'\n\nIteration #{iteration}...')
-            print('================================')
-            print(len(G.nodes),len(G.edges))
+        logging.debug(f'\n\nIteration #{iteration}...')
+        logging.debug('================================')
+        logging.debug(len(G.nodes),len(G.edges))
         nodes_to_cut = []
 
         # this part directly from paper
@@ -577,4 +673,4 @@ def iteratively_prune_graph(H, threshold=1, weight_threshold=None, weight_key='w
                 G = nx.Graph(G.subgraph(Gcc[0]))
             except IndexError:  # you have pruned away your graph, return a null graph rather than choke
                 return nx.generators.classic.null_graph()
-    return G
+    return G          
