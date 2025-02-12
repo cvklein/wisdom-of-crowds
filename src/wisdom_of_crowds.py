@@ -346,12 +346,16 @@ class Crowd:
 
     def D_edge(self, v, depth=None, selection=None):
         """
-        Calculating D edge-wise by seeing which topics are transmitted by the 
+        D_edge: calculates D edge-wise by seeing which topics are transmitted by the 
             informants of vertex v per (Sullivan et al. 2020)
-        :param v            : vertex to evaluate
-        :param depth_limit  : if we want to look past the immediate soures, how far back to look
-        :param selection    : if we want to only look at a selection of sources, these are the ones
-        :returns            : integer D_edge, in range 0 <= total topics attested in graph
+        
+        Args:
+            param v            : vertex to evaluate
+            param depth        : if we want to look past the immediate soures, how far back to look
+            param selection    : if we want to only look at a selection of sources, these are the ones
+        
+        Returns:
+            integer D_edge, in range 0 <= total topics attested in graph
         """
 
         if selection != None:
@@ -437,7 +441,17 @@ class Crowd:
         # return 0
     
     def census(self, nbunch = None, topics = False):
+        """
+        census: outputs a data structure containing the WoC network centrality measures for the nodes in the network (by default, all the nodes).
+        Can be specified to also include the values about the topics the node transmits and receives about. 
+
+        Args:
+            nbunch: if specified, will only return the values for these nodes, takes a list, set, graph, etc.
+            topics: Boolean which, if True, makes the function also output the measures about topics (D, pi, pi_t).
         
+        Returns:
+            dict output, with dictionaries of the WoC values keyed by node
+        """
         if nbunch is not None: #sets the graph as used by this function to either be the whole graph or (if specified) only a selection
             Gf = self.G.subgraph(nodes=nbunch) #the graph as it is used in this function (to allow for only looking at selections of sources)
         else:
