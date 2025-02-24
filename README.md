@@ -65,12 +65,19 @@ On the plus side, the optimizations mean that calcluating measures for an entire
 
 This software is released under the GNU General Public License version 3 (GPL3.0) [https://opensource.org/licenses/GPL-3.0](https://opensource.org/licenses/GPL-3.0)
 
-If you use this package, we'd appreciate a citation! (Watch this space for details)
+If you use this package, we'd appreciate a citation! Please cite:
+
+The wisdom of crowds: an eﬃcient, philosophically-validated, social epistemological
+network profiling toolkit (2023) Colin Klein, Marc Cheong, Marinus Ferreira, Emily
+Sullivan, and Mark Alfano. In: Cherifi, H., Mantegna, R.N., Rocha, L.M., Cherifi, C.,
+Miccich\`e, S. (eds) *Complex Networks and Their Applications XI* (Studies in Computational Intelligence, vol 1077). 62–73
 
 ### Version history
+v1.01.3 24 Feb 2025 -- updated citation, preparing to add wisdom_from_crowds
+
 v1.01.2 2 June 2022 -- bugfix on sparse graphs
 
-v1.01.1 11 May 2022 -- first version on pypi, successfully tested 
+v1.01.1 11 May 2022 -- first version on pypi, successfully tested
 
 v1.01 2 Mar 2022 -- License update
 
