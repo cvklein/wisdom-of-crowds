@@ -286,7 +286,7 @@ class Crowd:
         S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v. 
         If transmit == True, instead calculates calculates T, the inverse of S, i.e. the structural position of v as a transmitter.
         If mk == True, instead returns a tuple (S, m, k).
-        To speed up future calculations, it also caches the result (S, m, k) in the s_cache dictionary.
+        To speed up future calculations, it also caches the result (S, (m, k)) in the s_cache dictionary.
         
             S = max_{(m,k) in MK}(m * k)
             T = max_{(m,k) in MK}(m * k), but running is_m_k_observer() with transmit = True
@@ -298,7 +298,7 @@ class Crowd:
             
         Returns:
             integer S or T, in range 0 <= (class constant max_m * class constant max_k)
-            or tuple (S, m, k)
+            or tuple (S, (m, k))
         """
 
         try: #Attempt to retrieve previous results. If none exist, calculate S or T
@@ -307,11 +307,11 @@ class Crowd:
                 if show_mk:
                     return t_c
                 else:
-                    return t_c[0]
+                    return t_c[0]   # return only St from (St, (m,k))
             else:
                 s_c = self.s_cache[v]
                 if show_mk:
-                    return s_c
+                    return s_c      # return only S from (S, (m,k))
                 else:
                     return s_c[0]
         except KeyError:
@@ -326,24 +326,48 @@ class Crowd:
             mk_observer = self.is_mk_observer(v, m, k, transmit=transmit)
             if mk_observer:
                 if transmit:
-                    self.t_cache[v]= (mk, m, k)
+                    self.t_cache[v]= (mk, (m, k))
                 else:
-                    self.s_cache[v] = (mk, m, k)
+                    self.s_cache[v] = (mk, (m, k))
                 if show_mk:
-                    return (mk, m ,k)
+                    return (mk, (m ,k))
                 else:
                     return mk
             else:
                 pass
 
         if transmit:
-            self.t_cache[v]= (0,0,0)
+            self.t_cache[v]= (0,(0,0))
         else:
-            self.s_cache[v] = (0,0,0)
+            self.s_cache[v] = (0,(0,0))
         if show_mk:
-            return (0,0,0)
+            return (0,(0,0))
         else:
             return 0
+ 
+
+    def count_topics(self, v):
+        """
+        count_topics: return the number of distinct topics transmitted by vertex v, topics should be in a set if multiple
+        
+        Args:
+            v:          vertex to evaluate        
+        Returns:
+            integer counter
+        """
+
+        
+        try:
+            topics = self.G.nodes[v][self.node_key]
+            print(f'Counting topics {topics} for node {v}')
+            if type(topics) is not set: # Strings are the problem case, since they are iterable but should count as only 1 topic.
+                return 1
+            else:
+                return len(topics)
+        except KeyError:
+            print(f'Counting blank topics for node {v}')
+            return 0
+
 
     def D_edge(self, v, depth=None, selection=None):
         """
@@ -351,9 +375,9 @@ class Crowd:
             informants of vertex v per (Sullivan et al. 2020)
         
         Args:
-            param v            : vertex to evaluate
-            param depth        : if we want to look past the immediate soures, how far back to look
-            param selection    : if we want to only look at a selection of sources, these are the ones
+            v            : vertex to evaluate
+            depth        : if we want to look past the immediate soures, how far back to look
+            selection    : if we want to only look at a selection of sources, these are the ones
         
         Returns:
             integer D_edge, in range 0 <= total topics attested in graph
@@ -410,7 +434,8 @@ class Crowd:
 
     def pi(self, v, transmit = False):
         """
-        pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the product of S and D
+        pi: calculates pi, given vertex v, defined in (Sullivan et al., 2020) as the product of S and D for observers,
+            for transmitters it calculates pi_t as the product of St and the amount of topics it transmits itself.
         
         Args:
             v: vertex to evaluate
@@ -418,29 +443,34 @@ class Crowd:
         Returns:
             integer pi, where pi = S * D
         """
+        if transmit:
+            return self.count_topics(v) * self.S(v, transmit=transmit)
+        else:
+            return self.D(v) * self.S(v)
 
-        return self.D(v) * self.S(v, transmit=transmit)
-
-    def h_measure(self, v, max_h=6, transmit = False):
+    def h_measure(self, v, max_h=6, transmit=False):
         """
         h_measure: find the highest h, given vertex v, of which mk_observer(v, h, h) is true
         
         Args:
-            v: vertex to evaluate
-            max_h: maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
+            v:          vertex to evaluate
+            max_h:      maximum_h to evaluate, defaults to 6 per (Sullivan et al., 2020)
+            transmit:   whether to calculate the position as transmitter
         
         Returns:
             integer h, in range 1 < h <= max_h
         """
-        s,m,k = self.S(v, show_mk=True, transmit=transmit)
-        return min(m,k)
+        _, m_k = self.S(v, show_mk=True, transmit=transmit)
+        m,k = m_k
+        return min(m,k, max_h)
         
         #for h in range(max_h, 1, -1): # recall (k > 1)
         #    if self.is_mk_observer(v, h, h, transmit):
         #        return h
         #
         # return 0
-    
+
+
     def census(self, nbunch = None, topics = False):
         """
         census: outputs a data structure containing the WoC network centrality measures for the nodes in the network (by default, all the nodes).
@@ -461,10 +491,9 @@ class Crowd:
         output = dict()
         
         for n in Gf:
-            output.update({n : dict( S=self.S(n, mk=True), St=self.S(n, mk=True, transmit=True), H=self.h_measure(n), Ht=self.h_measure(n, transmit=True) )})
+            output.update({n : dict( S=self.S(n), St=self.S(n, transmit=True), H=self.h_measure(n), Ht=self.h_measure(n, transmit=True) )})
         
         if topics:
-            empty = True
             node_key = self.node_key
             for n in Gf:
                 output[n].update({node_key:Gf.nodes(data=self.node_key, default=None)[n]})

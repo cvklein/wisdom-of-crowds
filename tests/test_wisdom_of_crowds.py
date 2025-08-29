@@ -3,6 +3,7 @@ import warnings
 import networkx as nx
 import wisdom_of_crowds as woc
 import matplotlib
+import random
 
 def test_init():
     # check that one error was raised
@@ -178,6 +179,16 @@ def __construct_test_crowd_5nodes_withattrib(attrib):
     return c
 
 
+def __construct_test_crowd_5nodes_mixedattrib(attrib):
+    # Y red    7  no,6
+    # a->b->c->d<->e
+    # \____________^
+
+    c = __construct_test_crowd_5nodes_shortcut(attrib=attrib)
+    nx.set_node_attributes(c.G, {'a': 'Y', 'b': 'red', 'd': 7, 'e': {'no', 6}}, name=attrib)
+    return c
+
+
 def __construct_florentine_bidirectional():
     # For a basic statistical analysis of the Florentine network, refer
     # Jackson, M. O. (2010). Social and economic networks. Princeton University Press.
@@ -203,6 +214,24 @@ def __construct_florentine_bidirectional():
     c = woc.Crowd(DG)
     return c
 
+def __construct_directed_crowd_with_reverse(attrib = 'T', seed = 22):
+    # Randomly generates a networkx graph  from a 100 node randomly generated directed graph, wiht each node having between 1 and 3 topics it transmits.
+    # This is a more complex test case which will give different outputs for S(), etc. when transmit=True
+    # NOTE: Returns tuple of a Crowd from the random graph and a Crowd from the reverse of the random graph (with the direction of the edges reversed)
+
+    random.seed(seed)
+    LG = nx.fast_gnp_random_graph(100, 0.05, seed=seed, directed=True)
+    LG.remove_edges_from(nx.selfloop_edges(LG))  
+
+    for node in LG:
+        num_topics = random.randint(1, 3)   
+        topic = set()
+        for _ in range(num_topics):
+            die = random.randint(1, 6)
+            topic.add(chr(ord('@') + die))  # '@'+1 = 'A', ..., '@'+6 = 'F'
+        LG.nodes[node][attrib] = topic
+
+    return woc.Crowd(LG), woc.Crowd(nx.reverse(LG))
 
 @pytest.mark.filterwarnings("ignore:Performance warning")
 def test_is_mk_observer():
@@ -298,6 +327,16 @@ def test_S():
     c = __construct_florentine_bidirectional()
     assert c.S('Medici') == 5*4 # largest combo c.is_mk_observer('Medici', 5, 4)
 
+def test_count_topics():
+    c = __construct_test_crowd_5nodes_mixedattrib('T')
+    # Y red    7  no,6
+    # a->b->c->d<->e
+    # \____________^
+    assert c.count_topics('a') == 1
+    assert c.count_topics('b') == 1
+    assert c.count_topics('c') == 0
+    assert c.count_topics('d') == 1
+    assert c.count_topics('e') == 2
 
 def test_D():
     c = __construct_test_crowd_ab_only()
@@ -336,10 +375,12 @@ def test_pi():
     # case: using default node_key = 'T'
     c = __construct_test_crowd_5nodes_withattrib('T')
     assert c.pi('e') == c.S('e')*c.D('e') == 6*2
+    assert c.pi('a', transmit=True) == c.S('a', transmit=True)*c.count_topics('a') == 6*1
 
     # case: Florentine graph, considering node=Medici, default node_key = 'T'
     c = __construct_florentine_bidirectional()
     assert c.pi('Medici') == c.S('Medici')*c.D('Medici') == 20*2
+    assert c.pi('Medici', transmit=True) == c.S('Medici', transmit=True)*c.count_topics('Medici')
 
 
 def test_h_measure():
@@ -360,6 +401,55 @@ def test_h_measure():
     c = __construct_florentine_bidirectional()
     assert c.h_measure('Medici') == 4
 
+    # test functionality of setting an upper limit to h, using previous Crowd
+    assert c.h_measure('Medici', max_h=2) == 2
+
+
+def test_census():
+    c = __construct_test_crowd_5nodes_withattrib('T')
+    assert c.D('e') == 2  # d=N, a=Y, topics=len(YN)=2
+    assert c.D('a') == 0
+    assert c.D('b') == 1
+    
+    output = c.census()
+    assert isinstance(output, dict)
+    for node in c.G.nodes:
+        assert 'S' in output[node]
+        assert 'St' in output[node]
+        assert 'H' in output[node]
+        assert 'Ht' in output[node]
+
+    output_T = c.census(topics=True)
+    assert isinstance(output_T, dict)
+    for node in output_T:
+        assert 'S' in output_T[node]
+        assert 'St' in output_T[node]
+        assert 'H' in output_T[node]
+        assert 'Ht' in output_T[node]
+        assert 'D' in output_T[node]
+        assert 'pi' in output_T[node]
+        assert 'pi_t' in output_T[node]
+
+        assert output_T[node]['S'] == c.S(node)
+        assert output_T[node]['St'] == c.S(node, transmit=True)
+        assert output_T[node]['H'] == c.h_measure(node)
+        assert output_T[node]['Ht'] == c.h_measure(node, transmit=True)
+        assert output_T[node]['D'] == c.D(node)
+        assert output_T[node]['pi'] == c.pi(node)
+        assert output_T[node]['pi_t'] == c.pi(node, transmit=True)
+
+
+def test_transmit_measures():
+    c, r = __construct_directed_crowd_with_reverse()
+    c_census = c.census(topics=True)
+    r_census = r.census(topics=True)
+    for node in c_census:
+        assert c_census[node]['S'] == r_census[node]['St']
+        assert c_census[node]['St'] == r_census[node]['S']
+        assert c_census[node]['H'] == r_census[node]['Ht']
+        assert c_census[node]['Ht'] == r_census[node]['H']
+        # pi and pi_t are not reversible, because D is only for the case of an observer
+        # pi_t was tested in test_pi()
 
 @pytest.mark.filterwarnings("ignore:Performance warning")
 def test_clear_path_dict():
