@@ -461,10 +461,10 @@ class Crowd:
         output = dict()
         
         for n in Gf:
-            output.update({n : dict( S=self.S(n, mk=True), St=self.S(n, mk=True, transmit=True), H=self.h_measure(n), Ht=self.h_measure(n, transmit=True) )})
+            output.update({n : dict( S=self.S(n), St=self.S(n, transmit=True), H=self.h_measure(n), Ht=self.h_measure(n, transmit=True) )})
         
         if topics:
-            empty = True
+            #empty = True
             node_key = self.node_key
             for n in Gf:
                 output[n].update({node_key:Gf.nodes(data=self.node_key, default=None)[n]})

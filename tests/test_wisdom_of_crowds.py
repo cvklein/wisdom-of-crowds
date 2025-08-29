@@ -3,6 +3,7 @@ import warnings
 import networkx as nx
 import wisdom_of_crowds as woc
 import matplotlib
+import random
 
 def test_init():
     # check that one error was raised
@@ -203,6 +204,25 @@ def __construct_florentine_bidirectional():
     c = woc.Crowd(DG)
     return c
 
+def __construct_directed_graph_with_reverse(attrib = 'T'):
+    # Randomly generates a networkx graph  from a 100 node randomly generated directed graph, wiht each node having between 1 and 3 topics it transmits.
+    # This is a more complex test case which will give different outputs for S(), etc. when transmit=True
+    # NOTE: Returns tuple of a Crowd from the random graph and a Crowd from the reverse of the random graph (with the direction of the edges reversed)
+
+    seed = 22
+    random.seed(seed)
+    LG = nx.fast_gnp_random_graph(100, 0.05, seed=seed, directed=True)
+    LG.remove_edges_from(nx.selfloop_edges(LG))  
+
+    for node in LG:
+        num_topics = random.randint(1, 3)   
+        topic = set()
+        for _ in range(num_topics):
+            die = random.randint(1, 6)
+            topic.add(chr(ord('@') + die))  # '@'+1 = 'A', ..., '@'+6 = 'F'
+        LG.nodes[node][attrib] = topic
+
+    return woc.Crowd(LG), woc.Crowd(nx.reverse(LG))
 
 @pytest.mark.filterwarnings("ignore:Performance warning")
 def test_is_mk_observer():
@@ -359,6 +379,32 @@ def test_h_measure():
     # case: Florentine graph, considering node=Medici
     c = __construct_florentine_bidirectional()
     assert c.h_measure('Medici') == 4
+
+
+def test_census():
+    c = __construct_test_crowd_5nodes_withattrib('T')
+    assert c.D('e') == 2  # d=N, a=Y, topics=len(YN)=2
+    assert c.D('a') == 0
+    assert c.D('b') == 1
+    
+    output = c.census()
+    assert isinstance(output, dict)
+    for node in c.G.nodes:
+        assert 'S' in output[node]
+        assert 'St' in output[node]
+        assert 'H' in output[node]
+        assert 'Ht' in output[node]
+
+    output_withattrib = c.census(topics=True)
+    assert isinstance(output, dict)
+    for node in output_withattrib:
+        assert 'S' in output_withattrib[node]
+        assert 'St' in output_withattrib[node]
+        assert 'H' in output_withattrib[node]
+        assert 'Ht' in output_withattrib[node]
+        assert 'D' in output_withattrib[node]
+        assert 'pi' in output_withattrib[node]
+        assert 'pi_t' in output_withattrib[node]
 
 
 @pytest.mark.filterwarnings("ignore:Performance warning")
