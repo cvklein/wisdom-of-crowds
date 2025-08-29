@@ -281,7 +281,7 @@ class Crowd:
         return max_k_found
 
 
-    def S(self, v, mk = False, transmit = False):
+    def S(self, v, show_mk = False, transmit = False):
         """
         S: calculates S, defined in (Sullivan et al., 2020) as the structural position of v. 
         If transmit == True, instead calculates calculates T, the inverse of S, i.e. the structural position of v as a transmitter.
@@ -293,6 +293,7 @@ class Crowd:
                     
         Args:
             v:          vertex to evaluate
+            show_mk:    whether to return the m,k values along with S
             transmit:   whether to calculate the position as transmitter
             
         Returns:
@@ -303,13 +304,13 @@ class Crowd:
         try: #Attempt to retrieve previous results. If none exist, calculate S or T
             if transmit:
                 t_c = self.t_cache[v]
-                if mk:
+                if show_mk:
                     return t_c
                 else:
                     return t_c[0]
             else:
                 s_c = self.s_cache[v]
-                if mk:
+                if show_mk:
                     return s_c
                 else:
                     return s_c[0]
@@ -328,7 +329,7 @@ class Crowd:
                     self.t_cache[v]= (mk, m, k)
                 else:
                     self.s_cache[v] = (mk, m, k)
-                if mk:
+                if show_mk:
                     return (mk, m ,k)
                 else:
                     return mk
@@ -339,7 +340,7 @@ class Crowd:
             self.t_cache[v]= (0,0,0)
         else:
             self.s_cache[v] = (0,0,0)
-        if mk:
+        if show_mk:
             return (0,0,0)
         else:
             return 0
@@ -431,7 +432,7 @@ class Crowd:
         Returns:
             integer h, in range 1 < h <= max_h
         """
-        s,m,k = self.S(v, mk=True, transmit=transmit)
+        s,m,k = self.S(v, show_mk=True, transmit=transmit)
         return min(m,k)
         
         #for h in range(max_h, 1, -1): # recall (k > 1)
