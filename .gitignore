@@ -10,3 +10,5 @@ src/__pycache__/
 build/
 dist/
 src/wisdom_of_crowds.egg-info/
+.venv/
+src/scratchpad.ipynb
