@@ -73,6 +73,8 @@ Sullivan, and Mark Alfano. In: Cherifi, H., Mantegna, R.N., Rocha, L.M., Cherifi
 Miccich\`e, S. (eds) *Complex Networks and Their Applications XI* (Studies in Computational Intelligence, vol 1077). 62–73
 
 ### Version history
+v1.02 1 Sep 2025 -- merged new test cases, regenerated test reports (thanks Marinus)
+
 v1.01.3 24 Feb 2025 -- updated citation, preparing to add wisdom_from_crowds
 
 v1.01.2 2 June 2022 -- bugfix on sparse graphs
