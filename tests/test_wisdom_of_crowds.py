@@ -510,6 +510,29 @@ def test_make_sullivanplot(mock_show):
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], cax = matplotlib.pyplot.axes()) == None
     assert woc.make_sullivanplot([1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5], yscale="linear") == None
 
+def test_classic_vulnerable_sullivan_fig_4():
+    '''
+           ---> [b] ---
+          /            \\
+        [a] --> [c] --> [e]
+          \\            /
+           ---> [d] ---
+
+        Example from Sullivan (2020), Figure 4.
+        e should have an m,k of (3,2)
+    '''
+    DG = nx.DiGraph()
+    DG.add_edge('a','b')
+    DG.add_edge('a','c')
+    DG.add_edge('a','d')
+    DG.add_edge('b','e')
+    DG.add_edge('c','e')
+    DG.add_edge('d','e')
+    c = woc.Crowd(DG)
+    #the concern is that the current implementation will overstate m values
+    #because the default path algorithm won't consider the path b<-a->d etc.
+    assert c.is_mk_observer('e',4,3) == False
+    assert c.is_mk_observer('e',2,3) == True
 
 def test_iteratively_prune_graph():
     # case: pass a Crowd instead
